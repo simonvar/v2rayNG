@@ -28,6 +28,7 @@ import kotlinx.coroutines.launch
 import java.text.Collator
 
 class PerAppProxyActivity : BaseActivity() {
+
     private val binding by lazy {
         ActivityBypassListBinding.inflate(layoutInflater)
     }
@@ -100,21 +101,6 @@ class PerAppProxyActivity : BaseActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_bypass_list, menu)
-
-        val searchItem = menu.findItem(R.id.search_view)
-        if (searchItem != null) {
-            val searchView = searchItem.actionView as SearchView
-            searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-                override fun onQueryTextSubmit(query: String?): Boolean = false
-
-                override fun onQueryTextChange(newText: String?): Boolean {
-                    filterProxyApp(newText.orEmpty())
-                    return false
-                }
-            })
-        }
-
-
         return super.onCreateOptionsMenu(menu)
     }
 

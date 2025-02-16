@@ -1,34 +1,26 @@
 package com.v2ray.ang.ui
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.net.VpnService
 import android.os.Bundle
-import android.text.TextUtils
 import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.ActionBarDrawerToggle
-import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
-import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.navigation.NavigationView
-import com.google.android.material.tabs.TabLayout
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.AppConfig.VPN
 import com.v2ray.ang.R
 import com.v2ray.ang.databinding.ActivityMainBinding
-import com.v2ray.ang.dto.EConfigType
 import com.v2ray.ang.extension.toast
 import com.v2ray.ang.handler.AngConfigManager
 import com.v2ray.ang.handler.MmkvManager
@@ -36,43 +28,24 @@ import com.v2ray.ang.helper.SimpleItemTouchHelperCallback
 import com.v2ray.ang.service.V2RayServiceManager
 import com.v2ray.ang.util.Utils
 import com.v2ray.ang.viewmodel.MainViewModel
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
-import io.reactivex.rxjava3.core.Observable
-import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import me.drakeet.support.toast.ToastCompat
 
 class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedListener {
 
     private val binding by lazy { ActivityMainBinding.inflate(layoutInflater) }
 
     private val adapter by lazy { MainRecyclerAdapter(this) }
+
     private val requestVpnPermission =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (it.resultCode == RESULT_OK) {
                 startV2Ray()
             }
         }
-    private val requestSubSettingActivity =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            initGroupTab()
-        }
-    private val tabGroupListener =
-        object : TabLayout.OnTabSelectedListener {
-            override fun onTabSelected(tab: TabLayout.Tab?) {
-                val selectId = tab?.tag.toString()
-                if (selectId != mainViewModel.subscriptionId) {
-                    mainViewModel.subscriptionIdChanged(selectId)
-                }
-            }
 
-            override fun onTabUnselected(tab: TabLayout.Tab?) {}
-
-            override fun onTabReselected(tab: TabLayout.Tab?) {}
-        }
     private var mItemTouchHelper: ItemTouchHelper? = null
     val mainViewModel: MainViewModel by viewModels()
 
@@ -96,14 +69,6 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                 startV2Ray()
             }
         }
-        binding.layoutTest.setOnClickListener {
-            if (mainViewModel.isRunning.value == true) {
-                setTestState(getString(R.string.connection_test_testing))
-                mainViewModel.testCurrentServerRealPing()
-            } else {
-                //                tv_test_state.text = getString(R.string.connection_test_fail)
-            }
-        }
 
         binding.recyclerView.setHasFixedSize(true)
         binding.recyclerView.layoutManager = LinearLayoutManager(this)
@@ -124,7 +89,6 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         toggle.syncState()
         binding.navView.setNavigationItemSelectedListener(this)
 
-        initGroupTab()
         setupViewModel()
 
         onBackPressedDispatcher.addCallback(
@@ -149,48 +113,20 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                 adapter.notifyDataSetChanged()
             }
         }
-        mainViewModel.updateTestResultAction.observe(this) { setTestState(it) }
         mainViewModel.isRunning.observe(this) { isRunning ->
             adapter.isRunning = isRunning
             if (isRunning) {
                 binding.fab.setImageResource(R.drawable.ic_stop_24dp)
                 binding.fab.backgroundTintList =
                     ColorStateList.valueOf(ContextCompat.getColor(this, R.color.color_fab_active))
-                setTestState(getString(R.string.connection_connected))
-                binding.layoutTest.isFocusable = true
             } else {
                 binding.fab.setImageResource(R.drawable.ic_play_24dp)
                 binding.fab.backgroundTintList =
                     ColorStateList.valueOf(ContextCompat.getColor(this, R.color.color_fab_inactive))
-                setTestState(getString(R.string.connection_not_connected))
-                binding.layoutTest.isFocusable = false
             }
         }
         mainViewModel.startListenBroadcast()
         mainViewModel.initAssets(assets)
-    }
-
-    private fun initGroupTab() {
-        binding.tabGroup.removeOnTabSelectedListener(tabGroupListener)
-        binding.tabGroup.removeAllTabs()
-        binding.tabGroup.isVisible = false
-
-        val (listId, listRemarks) = mainViewModel.getSubscriptions(this)
-        if (listId == null || listRemarks == null) {
-            return
-        }
-
-        for (it in listRemarks.indices) {
-            val tab = binding.tabGroup.newTab()
-            tab.text = listRemarks[it]
-            tab.tag = listId[it]
-            binding.tabGroup.addTab(tab)
-        }
-        val selectIndex =
-            listId.indexOf(mainViewModel.subscriptionId).takeIf { it >= 0 } ?: (listId.count() - 1)
-        binding.tabGroup.selectTab(binding.tabGroup.getTabAt(selectIndex))
-        binding.tabGroup.addOnTabSelectedListener(tabGroupListener)
-        binding.tabGroup.isVisible = true
     }
 
     fun startV2Ray() {
@@ -199,16 +135,6 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             return
         }
         V2RayServiceManager.startV2Ray(this)
-    }
-
-    @SuppressLint("CheckResult")
-    fun restartV2Ray() {
-        if (mainViewModel.isRunning.value == true) {
-            Utils.stopVService(this)
-        }
-        Observable.timer(500, TimeUnit.MILLISECONDS)
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe { startV2Ray() }
     }
 
     public override fun onResume() {
@@ -222,216 +148,17 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
-
-        val searchItem = menu.findItem(R.id.search_view)
-        if (searchItem != null) {
-            val searchView = searchItem.actionView as SearchView
-            searchView.setOnQueryTextListener(
-                object : SearchView.OnQueryTextListener {
-                    override fun onQueryTextSubmit(query: String?): Boolean = false
-
-                    override fun onQueryTextChange(newText: String?): Boolean {
-                        mainViewModel.filterConfig(newText.orEmpty())
-                        return false
-                    }
-                }
-            )
-
-            searchView.setOnCloseListener {
-                mainViewModel.filterConfig("")
-                false
-            }
-        }
         return super.onCreateOptionsMenu(menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem) =
         when (item.itemId) {
-            R.id.import_qrcode -> {
-                importQRcode(true)
-                true
-            }
-
             R.id.import_clipboard -> {
                 importClipboard()
                 true
             }
 
-            R.id.import_manually_vmess -> {
-                importManually(EConfigType.VMESS.value)
-                true
-            }
-
-            R.id.import_manually_vless -> {
-                importManually(EConfigType.VLESS.value)
-                true
-            }
-
-            R.id.import_manually_ss -> {
-                importManually(EConfigType.SHADOWSOCKS.value)
-                true
-            }
-
-            R.id.import_manually_socks -> {
-                importManually(EConfigType.SOCKS.value)
-                true
-            }
-
-            R.id.import_manually_trojan -> {
-                importManually(EConfigType.TROJAN.value)
-                true
-            }
-
-            R.id.import_manually_wireguard -> {
-                importManually(EConfigType.WIREGUARD.value)
-                true
-            }
-
-            R.id.sub_update -> {
-                importConfigViaSub()
-                true
-            }
-
-            R.id.export_all -> {
-                binding.pbWaiting.show()
-                lifecycleScope.launch(Dispatchers.IO) {
-                    val ret = mainViewModel.exportAllServer()
-                    launch(Dispatchers.Main) {
-                        if (ret > 0) toast(getString(R.string.title_export_config_count, ret))
-                        else toast(R.string.toast_failure)
-                        binding.pbWaiting.hide()
-                    }
-                }
-
-                true
-            }
-
-            R.id.ping_all -> {
-                toast(
-                    getString(
-                        R.string.connection_test_testing_count,
-                        mainViewModel.serversCache.count(),
-                    )
-                )
-                mainViewModel.testAllTcping()
-                true
-            }
-
-            R.id.real_ping_all -> {
-                toast(
-                    getString(
-                        R.string.connection_test_testing_count,
-                        mainViewModel.serversCache.count(),
-                    )
-                )
-                mainViewModel.testAllRealPing()
-                true
-            }
-
-            R.id.service_restart -> {
-                restartV2Ray()
-                true
-            }
-
-            R.id.del_all_config -> {
-                AlertDialog.Builder(this)
-                    .setMessage(R.string.del_config_comfirm)
-                    .setPositiveButton(android.R.string.ok) { _, _ ->
-                        binding.pbWaiting.show()
-                        lifecycleScope.launch(Dispatchers.IO) {
-                            val ret = mainViewModel.removeAllServer()
-                            launch(Dispatchers.Main) {
-                                mainViewModel.reloadServerList()
-                                toast(getString(R.string.title_del_config_count, ret))
-                                binding.pbWaiting.hide()
-                            }
-                        }
-                    }
-                    .setNegativeButton(android.R.string.cancel) { _, _ ->
-                        // do noting
-                    }
-                    .show()
-                true
-            }
-
-            R.id.del_duplicate_config -> {
-                AlertDialog.Builder(this)
-                    .setMessage(R.string.del_config_comfirm)
-                    .setPositiveButton(android.R.string.ok) { _, _ ->
-                        binding.pbWaiting.show()
-                        lifecycleScope.launch(Dispatchers.IO) {
-                            val ret = mainViewModel.removeDuplicateServer()
-                            launch(Dispatchers.Main) {
-                                mainViewModel.reloadServerList()
-                                toast(getString(R.string.title_del_duplicate_config_count, ret))
-                                binding.pbWaiting.hide()
-                            }
-                        }
-                    }
-                    .setNegativeButton(android.R.string.cancel) { _, _ ->
-                        // do noting
-                    }
-                    .show()
-                true
-            }
-
-            R.id.del_invalid_config -> {
-                AlertDialog.Builder(this)
-                    .setMessage(R.string.del_invalid_config_comfirm)
-                    .setPositiveButton(android.R.string.ok) { _, _ ->
-                        binding.pbWaiting.show()
-                        lifecycleScope.launch(Dispatchers.IO) {
-                            val ret = mainViewModel.removeInvalidServer()
-                            launch(Dispatchers.Main) {
-                                mainViewModel.reloadServerList()
-                                toast(getString(R.string.title_del_config_count, ret))
-                                binding.pbWaiting.hide()
-                            }
-                        }
-                    }
-                    .setNegativeButton(android.R.string.cancel) { _, _ ->
-                        // do noting
-                    }
-                    .show()
-                true
-            }
-
-            R.id.sort_by_test_results -> {
-                binding.pbWaiting.show()
-                lifecycleScope.launch(Dispatchers.IO) {
-                    mainViewModel.sortByTestResults()
-                    launch(Dispatchers.Main) {
-                        mainViewModel.reloadServerList()
-                        binding.pbWaiting.hide()
-                    }
-                }
-                true
-            }
-
             else -> super.onOptionsItemSelected(item)
-        }
-
-    private fun importManually(createConfigType: Int) {
-        startActivity(
-            Intent()
-                .putExtra("createConfigType", createConfigType)
-                .putExtra("subscriptionId", mainViewModel.subscriptionId)
-                .setClass(this, ServerActivity::class.java)
-        )
-    }
-
-    /** import config from qrcode */
-    private fun importQRcode(forConfig: Boolean): Boolean {
-        scanQRCodeForConfig.launch(Intent(this, ScannerActivity::class.java))
-
-        return true
-    }
-
-    private val scanQRCodeForConfig =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            if (it.resultCode == RESULT_OK) {
-                importBatchConfig(it.data?.getStringExtra("SCAN_RESULT"))
-            }
         }
 
     /** import config from clipboard */
@@ -451,7 +178,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
 
         lifecycleScope.launch(Dispatchers.IO) {
             try {
-                val (count, countSub) =
+                val count =
                     AngConfigManager.importBatchConfig(server, mainViewModel.subscriptionId, true)
                 delay(500L)
                 withContext(Dispatchers.Main) {
@@ -460,8 +187,6 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                             toast(getString(R.string.title_import_config_count, count))
                             mainViewModel.reloadServerList()
                         }
-
-                        countSub > 0 -> initGroupTab()
                         else -> toast(R.string.toast_failure)
                     }
                     binding.pbWaiting.hide()
@@ -476,31 +201,6 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         }
     }
 
-    /** import config from sub */
-    private fun importConfigViaSub(): Boolean {
-        binding.pbWaiting.show()
-
-        lifecycleScope.launch(Dispatchers.IO) {
-            val count = mainViewModel.updateConfigViaSubAll()
-            delay(500L)
-            launch(Dispatchers.Main) {
-                if (count > 0) {
-                    toast(getString(R.string.title_update_config_count, count))
-                    mainViewModel.reloadServerList()
-                } else {
-                    toast(R.string.toast_failure)
-                }
-                // dialog.dismiss()
-                binding.pbWaiting.hide()
-            }
-        }
-        return true
-    }
-
-    private fun setTestState(content: String?) {
-        binding.tvTestState.text = content
-    }
-
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
         if (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_BUTTON_B) {
             moveTaskToBack(false)
@@ -512,30 +212,11 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         // Handle navigation view item clicks here.
         when (item.itemId) {
-            R.id.sub_setting -> {
-                requestSubSettingActivity.launch(Intent(this, SubSettingActivity::class.java))
-            }
-
             R.id.settings -> {
                 startActivity(
                     Intent(this, SettingsActivity::class.java)
                         .putExtra("isRunning", mainViewModel.isRunning.value == true)
                 )
-            }
-
-            R.id.routing_setting -> {
-                requestSubSettingActivity.launch(Intent(this, RoutingSettingActivity::class.java))
-            }
-
-            R.id.promotion -> {
-                Utils.openUri(
-                    this,
-                    "${Utils.decode(AppConfig.PromotionUrl)}?t=${System.currentTimeMillis()}",
-                )
-            }
-
-            R.id.logcat -> {
-                startActivity(Intent(this, LogcatActivity::class.java))
             }
 
             R.id.about -> {

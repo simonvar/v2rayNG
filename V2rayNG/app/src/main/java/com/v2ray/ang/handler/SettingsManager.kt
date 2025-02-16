@@ -19,7 +19,6 @@ import com.v2ray.ang.util.Utils
 import com.v2ray.ang.util.Utils.parseInt
 import java.io.File
 import java.io.FileOutputStream
-import java.util.Collections
 import kotlin.Int
 
 object SettingsManager {
@@ -45,78 +44,6 @@ object SettingsManager {
         return JsonUtil.fromJson(assets, Array<RulesetItem>::class.java).toMutableList()
     }
 
-    fun resetRoutingRulesetsFromPresets(context: Context, index: Int) {
-        val rulesetList = getPresetRoutingRulesets(context, index) ?: return
-        resetRoutingRulesetsCommon(rulesetList)
-    }
-
-    fun resetRoutingRulesets(content: String?): Boolean {
-        if (content.isNullOrEmpty()) {
-            return false
-        }
-
-        try {
-            val rulesetList =
-                JsonUtil.fromJson(content, Array<RulesetItem>::class.java).toMutableList()
-            if (rulesetList.isEmpty()) {
-                return false
-            }
-
-            resetRoutingRulesetsCommon(rulesetList)
-            return true
-        } catch (e: Exception) {
-            e.printStackTrace()
-            return false
-        }
-    }
-
-    private fun resetRoutingRulesetsCommon(rulesetList: MutableList<RulesetItem>) {
-        val rulesetNew: MutableList<RulesetItem> = mutableListOf()
-        MmkvManager.decodeRoutingRulesets()?.forEach { key ->
-            if (key.locked == true) {
-                rulesetNew.add(key)
-            }
-        }
-
-        rulesetNew.addAll(rulesetList)
-        MmkvManager.encodeRoutingRulesets(rulesetNew)
-    }
-
-    fun getRoutingRuleset(index: Int): RulesetItem? {
-        if (index < 0) return null
-
-        val rulesetList = MmkvManager.decodeRoutingRulesets()
-        if (rulesetList.isNullOrEmpty()) return null
-
-        return rulesetList[index]
-    }
-
-    fun saveRoutingRuleset(index: Int, ruleset: RulesetItem?) {
-        if (ruleset == null) return
-
-        var rulesetList = MmkvManager.decodeRoutingRulesets()
-        if (rulesetList.isNullOrEmpty()) {
-            rulesetList = mutableListOf()
-        }
-
-        if (index < 0 || index >= rulesetList.count()) {
-            rulesetList.add(0, ruleset)
-        } else {
-            rulesetList[index] = ruleset
-        }
-        MmkvManager.encodeRoutingRulesets(rulesetList)
-    }
-
-    fun removeRoutingRuleset(index: Int) {
-        if (index < 0) return
-
-        val rulesetList = MmkvManager.decodeRoutingRulesets()
-        if (rulesetList.isNullOrEmpty()) return
-
-        rulesetList.removeAt(index)
-        MmkvManager.encodeRoutingRulesets(rulesetList)
-    }
-
     fun routingRulesetsBypassLan(): Boolean {
         val vpnBypassLan = MmkvManager.decodeSettingsString(AppConfig.PREF_VPN_BYPASS_LAN) ?: "0"
         if (vpnBypassLan == "1") {
@@ -134,22 +61,6 @@ object SettingsManager {
                         it.ip?.contains(GEOIP_PRIVATE) == true
                 }
         return exist == true
-    }
-
-    fun swapRoutingRuleset(fromPosition: Int, toPosition: Int) {
-        val rulesetList = MmkvManager.decodeRoutingRulesets()
-        if (rulesetList.isNullOrEmpty()) return
-
-        Collections.swap(rulesetList, fromPosition, toPosition)
-        MmkvManager.encodeRoutingRulesets(rulesetList)
-    }
-
-    fun swapSubscriptions(fromPosition: Int, toPosition: Int) {
-        val subsList = MmkvManager.decodeSubsList()
-        if (subsList.isNullOrEmpty()) return
-
-        Collections.swap(subsList, fromPosition, toPosition)
-        MmkvManager.encodeSubsList(subsList)
     }
 
     fun getServerViaRemarks(remarks: String?): ProfileItem? {

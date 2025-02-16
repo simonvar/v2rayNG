@@ -86,9 +86,8 @@ object V2rayConfigManager {
 
         inbounds(v2rayConfig)
 
-        val isPlugin = false
-        val retOut = outbounds(v2rayConfig, config, isPlugin) ?: return result
-        val retMore = moreOutbounds(v2rayConfig, config.subscriptionId, isPlugin)
+        val retOut = outbounds(v2rayConfig, config) ?: return result
+        val retMore = moreOutbounds(v2rayConfig, config.subscriptionId)
 
         routing(v2rayConfig)
 
@@ -147,36 +146,7 @@ object V2rayConfigManager {
         return true
     }
 
-    private fun outbounds(
-        v2rayConfig: V2rayConfig,
-        config: ProfileItem,
-        isPlugin: Boolean,
-    ): Pair<Boolean, String>? {
-        if (isPlugin) {
-            val socksPort = Utils.findFreePort(listOf(100 + SettingsManager.getSocksPort(), 0))
-            val outboundNew =
-                V2rayConfig.OutboundBean(
-                    mux = null,
-                    protocol = EConfigType.SOCKS.name.lowercase(),
-                    settings =
-                        V2rayConfig.OutboundBean.OutSettingsBean(
-                            servers =
-                                listOf(
-                                    V2rayConfig.OutboundBean.OutSettingsBean.ServersBean(
-                                        address = LOOPBACK,
-                                        port = socksPort,
-                                    )
-                                )
-                        ),
-                )
-            if (v2rayConfig.outbounds.isNotEmpty()) {
-                v2rayConfig.outbounds[0] = outboundNew
-            } else {
-                v2rayConfig.outbounds.add(outboundNew)
-            }
-            return Pair(true, outboundNew.getServerAddressAndPort())
-        }
-
+    private fun outbounds(v2rayConfig: V2rayConfig, config: ProfileItem): Pair<Boolean, String>? {
         val outbound = getProxyOutbound(config) ?: return null
         val ret = updateOutboundWithGlobalSettings(outbound)
         if (!ret) return null
@@ -590,14 +560,10 @@ object V2rayConfigManager {
     private fun moreOutbounds(
         v2rayConfig: V2rayConfig,
         subscriptionId: String,
-        isPlugin: Boolean,
     ): Pair<Boolean, String> {
         val returnPair = Pair(false, "")
         var domainPort: String = ""
 
-        if (isPlugin) {
-            return returnPair
-        }
         // fragment proxy
         if (MmkvManager.decodeSettingsBool(AppConfig.PREF_FRAGMENT_ENABLED, false) == true) {
             return returnPair

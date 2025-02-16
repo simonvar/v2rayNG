@@ -44,18 +44,6 @@ object Utils {
     }
 
     /**
-     * find value in array position
-     */
-    fun arrayFind(array: Array<out String>, value: String): Int {
-        for (i in array.indices) {
-            if (array[i] == value) {
-                return i
-            }
-        }
-        return -1
-    }
-
-    /**
      * parseInt
      */
     fun parseInt(str: String): Int {
@@ -455,9 +443,6 @@ object Utils {
         return URL(url.protocol, IDN.toASCII(url.host, IDN.ALLOW_UNASSIGNED), url.port, url.file)
             .toExternalForm()
     }
-
-    fun isTv(context: Context): Boolean =
-        context.packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)
 
     fun getDelayTestUrl(second: Boolean = false): String {
         return if (second) {

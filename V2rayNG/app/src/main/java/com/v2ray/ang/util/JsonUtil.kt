@@ -11,6 +11,7 @@ import com.google.gson.reflect.TypeToken
 import java.lang.reflect.Type
 
 object JsonUtil {
+
     private var gson = Gson()
 
     fun toJson(src: Any?): String {
@@ -19,23 +20,6 @@ object JsonUtil {
 
     fun <T> fromJson(src: String, cls: Class<T>): T {
         return gson.fromJson(src, cls)
-    }
-
-    fun toJsonPretty(src: Any?): String? {
-        if (src == null) return null
-        val gsonPre =
-            GsonBuilder()
-                .setPrettyPrinting()
-                .disableHtmlEscaping()
-                .registerTypeAdapter( // custom serializer is needed here since JSON by default
-                                      // parse number as Double, core will fail to start
-                    object : TypeToken<Double>() {}.type,
-                    JsonSerializer { src: Double?, _: Type?, _: JsonSerializationContext? ->
-                        JsonPrimitive(src?.toInt())
-                    },
-                )
-                .create()
-        return gsonPre.toJson(src)
     }
 
     fun parseString(src: String?): JsonObject? {

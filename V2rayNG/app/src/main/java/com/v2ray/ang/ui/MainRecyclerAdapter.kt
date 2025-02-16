@@ -87,47 +87,7 @@ class MainRecyclerAdapter(val activity: MainActivity) :
 
             holder.itemMainBinding.tvStatistics.text = strState
 
-            holder.itemMainBinding.layoutShare.setOnClickListener {
-                AlertDialog.Builder(mActivity)
-                    .setItems(shareOptions.toTypedArray()) { _, i ->
-                        try {
-                            when (i) {
-                                0 -> {
 
-                                    val ivBinding =
-                                        ItemQrcodeBinding.inflate(LayoutInflater.from(mActivity))
-                                    ivBinding.ivQcode.setImageBitmap(
-                                        AngConfigManager.share2QRCode(guid)
-                                    )
-                                    AlertDialog.Builder(mActivity).setView(ivBinding.root).show()
-                                }
-
-                                1 -> {
-                                    if (AngConfigManager.share2Clipboard(mActivity, guid) == 0) {
-                                        mActivity.toast(R.string.toast_success)
-                                    } else {
-                                        mActivity.toast(R.string.toast_failure)
-                                    }
-                                }
-
-                                2 -> shareFullContent(guid)
-                                else -> mActivity.toast("else")
-                            }
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                        }
-                    }
-                    .show()
-            }
-
-            holder.itemMainBinding.layoutEdit.setOnClickListener {
-                val intent =
-                    Intent()
-                        .putExtra("guid", guid)
-                        .putExtra("isRunning", isRunning)
-                        .putExtra("createConfigType", profile.configType.value)
-                mActivity.startActivity(intent.setClass(mActivity, ServerActivity::class.java))
-            }
             holder.itemMainBinding.layoutRemove.setOnClickListener {
                 if (guid != MmkvManager.getSelectServer()) {
                     if (MmkvManager.decodeSettingsBool(AppConfig.PREF_CONFIRM_REMOVE) == true) {
@@ -166,8 +126,6 @@ class MainRecyclerAdapter(val activity: MainActivity) :
             }
         }
         if (holder is FooterViewHolder) {
-            // if (activity?.defaultDPreference?.getPrefBoolean(AppConfig.PREF_INAPP_BUY_IS_PREMIUM,
-            // false)) {
             if (true) {
                 holder.itemFooterBinding.layoutEdit.visibility = View.INVISIBLE
             } else {
@@ -178,14 +136,6 @@ class MainRecyclerAdapter(val activity: MainActivity) :
                     )
                 }
             }
-        }
-    }
-
-    private fun shareFullContent(guid: String) {
-        if (AngConfigManager.shareFullContent2Clipboard(mActivity, guid) == 0) {
-            mActivity.toast(R.string.toast_success)
-        } else {
-            mActivity.toast(R.string.toast_failure)
         }
     }
 

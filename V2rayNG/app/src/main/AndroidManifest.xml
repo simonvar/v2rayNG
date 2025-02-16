@@ -31,17 +31,16 @@
     <uses-permission
         android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />
+
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <!-- <useapplications-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" /> -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission
         android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE"
         android:minSdkVersion="34" />
-    <!-- <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /> -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
@@ -77,29 +76,10 @@
                 android:resource="@xml/shortcuts" />
         </activity>
         <activity
-            android:name=".ui.ServerActivity"
-            android:exported="false"
-            android:windowSoftInputMode="stateUnchanged" />
-        <activity
             android:name=".ui.SettingsActivity"
             android:exported="false" />
         <activity
             android:name=".ui.PerAppProxyActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.ScannerActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.LogcatActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.RoutingSettingActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.RoutingEditActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.SubSettingActivity"
             android:exported="false" />
         <activity
             android:name=".ui.UserAssetActivity"
@@ -109,37 +89,12 @@
             android:exported="false" />
 
         <activity
-            android:name=".ui.SubEditActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.ScScannerActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.ScSwitchActivity"
+            android:name=".ui.ShortcutSwitchActivity"
             android:excludeFromRecents="true"
             android:exported="false"
             android:process=":RunSoLibV2RayDaemon"
             android:theme="@style/AppTheme.NoActionBar.Translucent" />
 
-        <activity
-            android:name=".ui.UrlSchemeActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.SEND" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="text/plain" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.BROWSABLE" />
-                <category android:name="android.intent.category.DEFAULT" />
-
-                <data android:scheme="v2rayng" />
-                <data android:host="install-config" />
-                <data android:host="install-sub" />
-            </intent-filter>
-        </activity>
         <activity
             android:name=".ui.AboutActivity"
             android:exported="false" />
@@ -174,11 +129,6 @@
                 android:value="proxy" />
         </service>
 
-        <service
-            android:name=".service.V2RayTestService"
-            android:exported="false"
-            android:process=":RunSoLibV2RayDaemon" />
-
         <receiver
             android:name=".receiver.WidgetProvider"
             android:exported="true"
@@ -192,6 +142,7 @@
                 <action android:name="com.v2ray.ang.action.activity" />
             </intent-filter>
         </receiver>
+
         <receiver
             android:name=".receiver.BootReceiver"
             android:exported="true"
