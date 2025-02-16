@@ -10,6 +10,7 @@ import java.net.URI
 import kotlin.text.orEmpty
 
 object SocksFmt : FmtBase() {
+
     fun parse(str: String): ProfileItem? {
         val config = ProfileItem.create(EConfigType.SOCKS)
 
@@ -34,10 +35,7 @@ object SocksFmt : FmtBase() {
 
     fun toUri(config: ProfileItem): String {
         val pw =
-            if (config.username.isNotNullEmpty())
-                "${config.username}:${config.password}"
-            else
-                ":"
+            if (config.username.isNotNullEmpty()) "${config.username}:${config.password}" else ":"
 
         return toUri(config, Utils.encode(pw), null)
     }
@@ -58,5 +56,4 @@ object SocksFmt : FmtBase() {
 
         return outboundBean
     }
-
 }

@@ -58,7 +58,7 @@ object SettingsManager {
         try {
             val rulesetList =
                 JsonUtil.fromJson(content, Array<RulesetItem>::class.java).toMutableList()
-            if (rulesetList.isNullOrEmpty()) {
+            if (rulesetList.isEmpty()) {
                 return false
             }
 

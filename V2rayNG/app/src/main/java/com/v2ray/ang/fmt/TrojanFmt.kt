@@ -12,6 +12,7 @@ import java.net.URI
 import kotlin.text.orEmpty
 
 object TrojanFmt : FmtBase() {
+
     fun parse(str: String): ProfileItem? {
         var allowInsecure = MmkvManager.decodeSettingsBool(AppConfig.PREF_ALLOW_INSECURE, false)
         val config = ProfileItem.create(EConfigType.TROJAN)
@@ -52,27 +53,32 @@ object TrojanFmt : FmtBase() {
             server.flow = profileItem.flow
         }
 
-        val sni = outboundBean?.streamSettings?.populateTransportSettings(
-            profileItem.network.orEmpty(),
-            profileItem.headerType,
-            profileItem.host,
-            profileItem.path,
-            profileItem.seed,
-            profileItem.mode,
-            profileItem.serviceName,
-            profileItem.authority,
-        )
+        val sni =
+            outboundBean
+                ?.streamSettings
+                ?.populateTransportSettings(
+                    profileItem.network.orEmpty(),
+                    profileItem.headerType,
+                    profileItem.host,
+                    profileItem.path,
+                    profileItem.seed,
+                    profileItem.mode,
+                    profileItem.serviceName,
+                    profileItem.authority,
+                )
 
-        outboundBean?.streamSettings?.populateTlsSettings(
-            profileItem.security.orEmpty(),
-            profileItem.insecure == true,
-            if (profileItem.sni.isNullOrEmpty()) sni else profileItem.sni,
-            profileItem.fingerPrint,
-            profileItem.alpn,
-            profileItem.publicKey,
-            profileItem.shortId,
-            profileItem.spiderX,
-        )
+        outboundBean
+            ?.streamSettings
+            ?.populateTlsSettings(
+                profileItem.security.orEmpty(),
+                profileItem.insecure == true,
+                if (profileItem.sni.isNullOrEmpty()) sni else profileItem.sni,
+                profileItem.fingerPrint,
+                profileItem.alpn,
+                profileItem.publicKey,
+                profileItem.shortId,
+                profileItem.spiderX,
+            )
 
         return outboundBean
     }

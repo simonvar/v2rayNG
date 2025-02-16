@@ -298,10 +298,6 @@ object MmkvManager {
         return settingsStorage.encode(key, value)
     }
 
-    fun encodeSettings(key: String, value: Int): Boolean {
-        return settingsStorage.encode(key, value)
-    }
-
     fun encodeSettings(key: String, value: Boolean): Boolean {
         return settingsStorage.encode(key, value)
     }

@@ -1,15 +1,11 @@
 package com.v2ray.ang.extension
 
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.os.Build
-import android.os.Bundle
 import android.widget.Toast
 import com.v2ray.ang.AngApplication
 import me.drakeet.support.toast.ToastCompat
-import org.json.JSONObject
 import java.io.Serializable
 import java.net.URI
 import java.net.URLConnection
@@ -51,8 +47,6 @@ val URLConnection.responseLength: Long
 val URI.idnHost: String
     get() = host?.replace("[", "")?.replace("]", "").orEmpty()
 
-
-fun String.toLongEx(): Long = toLongOrNull() ?: 0
 
 inline fun <reified T : Serializable> Intent.serializable(key: String): T? = when {
     Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> getSerializableExtra(key, T::class.java)

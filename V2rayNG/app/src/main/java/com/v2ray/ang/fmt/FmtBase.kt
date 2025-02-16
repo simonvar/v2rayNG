@@ -8,29 +8,41 @@ import com.v2ray.ang.util.Utils
 import java.net.URI
 
 open class FmtBase {
-    fun toUri(config: ProfileItem, userInfo: String?, dicQuery: HashMap<String, String>?): String {
-        val query = if (dicQuery != null)
-            ("?" + dicQuery.toList().joinToString(
-                separator = "&",
-                transform = { it.first + "=" + Utils.urlEncode(it.second) }))
-        else ""
 
-        val url = String.format(
-            "%s@%s:%s",
-            Utils.urlEncode(userInfo ?: ""),
-            Utils.getIpv6Address(config.server),
-            config.serverPort
-        )
+    fun toUri(config: ProfileItem, userInfo: String?, dicQuery: HashMap<String, String>?): String {
+        val query =
+            if (dicQuery != null)
+                ("?" +
+                    dicQuery
+                        .toList()
+                        .joinToString(
+                            separator = "&",
+                            transform = { it.first + "=" + Utils.urlEncode(it.second) },
+                        ))
+            else ""
+
+        val url =
+            String.format(
+                "%s@%s:%s",
+                Utils.urlEncode(userInfo ?: ""),
+                Utils.getIpv6Address(config.server),
+                config.serverPort,
+            )
 
         return "${url}${query}#${Utils.urlEncode(config.remarks)}"
     }
 
     fun getQueryParam(uri: URI): Map<String, String> {
-        return uri.rawQuery.split("&")
-            .associate { it.split("=").let { (k, v) -> k to Utils.urlDecode(v) } }
+        return uri.rawQuery.split("&").associate {
+            it.split("=").let { (k, v) -> k to Utils.urlDecode(v) }
+        }
     }
 
-    fun getItemFormQuery(config: ProfileItem, queryParam: Map<String, String>, allowInsecure: Boolean) {
+    fun getItemFormQuery(
+        config: ProfileItem,
+        queryParam: Map<String, String>,
+        allowInsecure: Boolean,
+    ) {
         config.network = queryParam["type"] ?: NetworkType.TCP.type
         config.headerType = queryParam["headerType"]
         config.host = queryParam["host"]
@@ -49,11 +61,12 @@ open class FmtBase {
         if (config.security != AppConfig.TLS && config.security != AppConfig.REALITY) {
             config.security = null
         }
-        config.insecure = if (queryParam["allowInsecure"].isNullOrEmpty()) {
-            allowInsecure
-        } else {
-            queryParam["allowInsecure"].orEmpty() == "1"
-        }
+        config.insecure =
+            if (queryParam["allowInsecure"].isNullOrEmpty()) {
+                allowInsecure
+            } else {
+                queryParam["allowInsecure"].orEmpty() == "1"
+            }
         config.sni = queryParam["sni"]
         config.fingerPrint = queryParam["fp"]
         config.alpn = queryParam["alpn"]
@@ -88,19 +101,21 @@ open class FmtBase {
                 config.seed.let { if (it.isNotNullEmpty()) dicQuery["seed"] = it.orEmpty() }
             }
 
-            NetworkType.WS, NetworkType.HTTP_UPGRADE -> {
+            NetworkType.WS,
+            NetworkType.HTTP_UPGRADE -> {
                 config.host.let { if (it.isNotNullEmpty()) dicQuery["host"] = it.orEmpty() }
                 config.path.let { if (it.isNotNullEmpty()) dicQuery["path"] = it.orEmpty() }
             }
 
-             NetworkType.XHTTP -> {
+            NetworkType.XHTTP -> {
                 config.host.let { if (it.isNotNullEmpty()) dicQuery["host"] = it.orEmpty() }
                 config.path.let { if (it.isNotNullEmpty()) dicQuery["path"] = it.orEmpty() }
                 config.xhttpMode.let { if (it.isNotNullEmpty()) dicQuery["mode"] = it.orEmpty() }
                 config.xhttpExtra.let { if (it.isNotNullEmpty()) dicQuery["extra"] = it.orEmpty() }
             }
 
-            NetworkType.HTTP, NetworkType.H2 -> {
+            NetworkType.HTTP,
+            NetworkType.H2 -> {
                 dicQuery["type"] = "http"
                 config.host.let { if (it.isNotNullEmpty()) dicQuery["host"] = it.orEmpty() }
                 config.path.let { if (it.isNotNullEmpty()) dicQuery["path"] = it.orEmpty() }
@@ -108,8 +123,12 @@ open class FmtBase {
 
             NetworkType.GRPC -> {
                 config.mode.let { if (it.isNotNullEmpty()) dicQuery["mode"] = it.orEmpty() }
-                config.authority.let { if (it.isNotNullEmpty()) dicQuery["authority"] = it.orEmpty() }
-                config.serviceName.let { if (it.isNotNullEmpty()) dicQuery["serviceName"] = it.orEmpty() }
+                config.authority.let {
+                    if (it.isNotNullEmpty()) dicQuery["authority"] = it.orEmpty()
+                }
+                config.serviceName.let {
+                    if (it.isNotNullEmpty()) dicQuery["serviceName"] = it.orEmpty()
+                }
             }
         }
 

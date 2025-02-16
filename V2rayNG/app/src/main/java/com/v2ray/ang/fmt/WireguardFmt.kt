@@ -11,6 +11,7 @@ import java.net.URI
 import kotlin.text.orEmpty
 
 object WireguardFmt : FmtBase() {
+
     fun parse(str: String): ProfileItem? {
         val config = ProfileItem.create(EConfigType.WIREGUARD)
 

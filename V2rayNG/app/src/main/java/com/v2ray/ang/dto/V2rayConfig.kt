@@ -515,95 +515,6 @@ data class V2rayConfig(
             val port = getServerPort()
             return Utils.getIpv6Address(address) + ":" + port
         }
-
-        fun getPassword(): String? {
-            if (
-                protocol.equals(EConfigType.VMESS.name, true) ||
-                    protocol.equals(EConfigType.VLESS.name, true)
-            ) {
-                return settings?.vnext?.first()?.users?.first()?.id
-            } else if (
-                protocol.equals(EConfigType.SHADOWSOCKS.name, true) ||
-                    protocol.equals(EConfigType.TROJAN.name, true)
-            ) {
-                return settings?.servers?.first()?.password
-            } else if (protocol.equals(EConfigType.SOCKS.name, true)) {
-                return settings?.servers?.first()?.users?.first()?.pass
-            } else if (protocol.equals(EConfigType.WIREGUARD.name, true)) {
-                return settings?.secretKey
-            }
-            return null
-        }
-
-        fun getSecurityEncryption(): String? {
-            return when {
-                protocol.equals(EConfigType.VMESS.name, true) ->
-                    settings?.vnext?.first()?.users?.first()?.security
-                protocol.equals(EConfigType.VLESS.name, true) ->
-                    settings?.vnext?.first()?.users?.first()?.encryption
-                protocol.equals(EConfigType.SHADOWSOCKS.name, true) ->
-                    settings?.servers?.first()?.method
-                else -> null
-            }
-        }
-
-        fun getTransportSettingDetails(): List<String?>? {
-            if (
-                protocol.equals(EConfigType.VMESS.name, true) ||
-                    protocol.equals(EConfigType.VLESS.name, true) ||
-                    protocol.equals(EConfigType.TROJAN.name, true) ||
-                    protocol.equals(EConfigType.SHADOWSOCKS.name, true)
-            ) {
-                val transport = streamSettings?.network ?: return null
-                return when (transport) {
-                    NetworkType.TCP.type -> {
-                        val tcpSetting = streamSettings?.tcpSettings ?: return null
-                        listOf(
-                            tcpSetting.header.type,
-                            tcpSetting.header.request?.headers?.Host?.joinToString(",").orEmpty(),
-                            tcpSetting.header.request?.path?.joinToString(",").orEmpty(),
-                        )
-                    }
-
-                    NetworkType.KCP.type -> {
-                        val kcpSetting = streamSettings?.kcpSettings ?: return null
-                        listOf(kcpSetting.header.type, "", kcpSetting.seed.orEmpty())
-                    }
-
-                    NetworkType.WS.type -> {
-                        val wsSetting = streamSettings?.wsSettings ?: return null
-                        listOf("", wsSetting.headers.Host, wsSetting.path)
-                    }
-
-                    NetworkType.HTTP_UPGRADE.type -> {
-                        val httpupgradeSetting = streamSettings?.httpupgradeSettings ?: return null
-                        listOf("", httpupgradeSetting.host, httpupgradeSetting.path)
-                    }
-
-                    NetworkType.XHTTP.type -> {
-                        val xhttpSettings = streamSettings?.xhttpSettings ?: return null
-                        listOf("", xhttpSettings.host, xhttpSettings.path)
-                    }
-
-                    NetworkType.H2.type -> {
-                        val h2Setting = streamSettings?.httpSettings ?: return null
-                        listOf("", h2Setting.host.joinToString(","), h2Setting.path)
-                    }
-
-                    NetworkType.GRPC.type -> {
-                        val grpcSetting = streamSettings?.grpcSettings ?: return null
-                        listOf(
-                            if (grpcSetting.multiMode == true) "multi" else "gun",
-                            grpcSetting.authority.orEmpty(),
-                            grpcSetting.serviceName,
-                        )
-                    }
-
-                    else -> null
-                }
-            }
-            return null
-        }
     }
 
     data class DnsBean(
@@ -666,23 +577,12 @@ data class V2rayConfig(
         var poolSize: Int = 10000,
     ) // roughly 10 times smaller than total ip pool
 
-    fun getProxyOutbound(): OutboundBean? {
-        outbounds.forEach { outbound ->
-            EConfigType.entries.forEach {
-                if (outbound.protocol.equals(it.name, true)) {
-                    return outbound
-                }
-            }
-        }
-        return null
-    }
-
     fun toPrettyPrinting(): String {
         return GsonBuilder()
             .setPrettyPrinting()
             .disableHtmlEscaping()
             .registerTypeAdapter( // custom serialiser is needed here since JSON by default parse
-                                  // number as Double, core will fail to start
+                // number as Double, core will fail to start
                 object : TypeToken<Double>() {}.type,
                 JsonSerializer { src: Double?, _: Type?, _: JsonSerializationContext? ->
                     JsonPrimitive(src?.toInt())

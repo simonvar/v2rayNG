@@ -58,11 +58,6 @@ object VmessFmt : FmtBase() {
                 config.seed = vmessQRCode.path
             }
 
-//            NetworkType.QUIC -> {
-//                config.quicSecurity = vmessQRCode.host
-//                config.quicKey = vmessQRCode.path
-//            }
-
             NetworkType.GRPC -> {
                 config.mode = vmessQRCode.type
                 config.serviceName = vmessQRCode.path
@@ -97,11 +92,6 @@ object VmessFmt : FmtBase() {
             NetworkType.KCP -> {
                 vmessQRCode.path = config.seed.orEmpty()
             }
-
-//            NetworkType.QUIC -> {
-//                vmessQRCode.host = config.quicSecurity.orEmpty()
-//                vmessQRCode.path = config.quicKey.orEmpty()
-//            }
 
             NetworkType.GRPC -> {
                 vmessQRCode.type = config.mode.orEmpty()

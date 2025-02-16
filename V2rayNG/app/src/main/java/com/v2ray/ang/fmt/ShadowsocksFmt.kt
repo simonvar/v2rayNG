@@ -9,6 +9,7 @@ import com.v2ray.ang.util.Utils
 import java.net.URI
 
 object ShadowsocksFmt : FmtBase() {
+
     fun parse(str: String): ProfileItem? {
         return parseSip002(str) ?: parseLegacy(str)
     }
@@ -25,11 +26,12 @@ object ShadowsocksFmt : FmtBase() {
         config.server = uri.idnHost
         config.serverPort = uri.port.toString()
 
-        val result = if (uri.userInfo.contains(":")) {
-            uri.userInfo.split(":", limit = 2)
-        } else {
-            Utils.decode(uri.userInfo).split(":", limit = 2)
-        }
+        val result =
+            if (uri.userInfo.contains(":")) {
+                uri.userInfo.split(":", limit = 2)
+            } else {
+                Utils.decode(uri.userInfo).split(":", limit = 2)
+            }
         if (result.count() == 2) {
             config.method = result.first()
             config.password = result.last()
@@ -61,8 +63,7 @@ object ShadowsocksFmt : FmtBase() {
         val indexSplit = result.indexOf("#")
         if (indexSplit > 0) {
             try {
-                config.remarks =
-                    Utils.urlDecode(result.substring(indexSplit + 1, result.length))
+                config.remarks = Utils.urlDecode(result.substring(indexSplit + 1, result.length))
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -70,16 +71,14 @@ object ShadowsocksFmt : FmtBase() {
             result = result.substring(0, indexSplit)
         }
 
-        //part decode
+        // part decode
         val indexS = result.indexOf("@")
-        result = if (indexS > 0) {
-            Utils.decode(result.substring(0, indexS)) + result.substring(
-                indexS,
-                result.length
-            )
-        } else {
-            Utils.decode(result)
-        }
+        result =
+            if (indexS > 0) {
+                Utils.decode(result.substring(0, indexS)) + result.substring(indexS, result.length)
+            } else {
+                Utils.decode(result)
+            }
 
         val legacyPattern = "^(.+?):(.*)@(.+?):(\\d+?)/?$".toRegex()
         val match = legacyPattern.matchEntire(result) ?: return null
@@ -108,30 +107,33 @@ object ShadowsocksFmt : FmtBase() {
             server.method = profileItem.method
         }
 
-        val sni = outboundBean?.streamSettings?.populateTransportSettings(
-            profileItem.network.orEmpty(),
-            profileItem.headerType,
-            profileItem.host,
-            profileItem.path,
-            profileItem.seed,
-            profileItem.mode,
-            profileItem.serviceName,
-            profileItem.authority,
-        )
+        val sni =
+            outboundBean
+                ?.streamSettings
+                ?.populateTransportSettings(
+                    profileItem.network.orEmpty(),
+                    profileItem.headerType,
+                    profileItem.host,
+                    profileItem.path,
+                    profileItem.seed,
+                    profileItem.mode,
+                    profileItem.serviceName,
+                    profileItem.authority,
+                )
 
-        outboundBean?.streamSettings?.populateTlsSettings(
-            profileItem.security.orEmpty(),
-            profileItem.insecure == true,
-            if (profileItem.sni.isNullOrEmpty()) sni else profileItem.sni,
-            profileItem.fingerPrint,
-            profileItem.alpn,
-            profileItem.publicKey,
-            profileItem.shortId,
-            profileItem.spiderX,
-        )
+        outboundBean
+            ?.streamSettings
+            ?.populateTlsSettings(
+                profileItem.security.orEmpty(),
+                profileItem.insecure == true,
+                if (profileItem.sni.isNullOrEmpty()) sni else profileItem.sni,
+                profileItem.fingerPrint,
+                profileItem.alpn,
+                profileItem.publicKey,
+                profileItem.shortId,
+                profileItem.spiderX,
+            )
 
         return outboundBean
     }
-
-
 }
