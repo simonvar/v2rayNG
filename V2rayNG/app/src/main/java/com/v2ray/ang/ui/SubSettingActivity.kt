@@ -1,5 +1,6 @@
 package com.v2ray.ang.ui
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
@@ -21,6 +22,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class SubSettingActivity : BaseActivity() {
+
     private val binding by lazy { ActivitySubSettingBinding.inflate(layoutInflater) }
 
     var subscriptions: List<Pair<String, SubscriptionItem>> = listOf()
@@ -51,38 +53,40 @@ class SubSettingActivity : BaseActivity() {
         return super.onCreateOptionsMenu(menu)
     }
 
-    override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
-        R.id.add_config -> {
-            startActivity(Intent(this, SubEditActivity::class.java))
-            true
-        }
-
-        R.id.sub_update -> {
-            val dialog = AlertDialog.Builder(this)
-                .setView(LayoutProgressBinding.inflate(layoutInflater).root)
-                .setCancelable(false)
-                .show()
-
-            lifecycleScope.launch(Dispatchers.IO) {
-                val count = AngConfigManager.updateConfigViaSubAll()
-                delay(500L)
-                launch(Dispatchers.Main) {
-                    if (count > 0) {
-                        toast(R.string.toast_success)
-                    } else {
-                        toast(R.string.toast_failure)
-                    }
-                    dialog.dismiss()
-                }
+    override fun onOptionsItemSelected(item: MenuItem) =
+        when (item.itemId) {
+            R.id.add_config -> {
+                startActivity(Intent(this, SubEditActivity::class.java))
+                true
             }
 
-            true
+            R.id.sub_update -> {
+                val dialog =
+                    AlertDialog.Builder(this)
+                        .setView(LayoutProgressBinding.inflate(layoutInflater).root)
+                        .setCancelable(false)
+                        .show()
+
+                lifecycleScope.launch(Dispatchers.IO) {
+                    val count = AngConfigManager.updateConfigViaSubAll()
+                    delay(500L)
+                    launch(Dispatchers.Main) {
+                        if (count > 0) {
+                            toast(R.string.toast_success)
+                        } else {
+                            toast(R.string.toast_failure)
+                        }
+                        dialog.dismiss()
+                    }
+                }
+
+                true
+            }
+
+            else -> super.onOptionsItemSelected(item)
         }
 
-        else -> super.onOptionsItemSelected(item)
-
-    }
-
+    @SuppressLint("NotifyDataSetChanged")
     fun refreshData() {
         subscriptions = MmkvManager.decodeSubscriptions()
         adapter.notifyDataSetChanged()

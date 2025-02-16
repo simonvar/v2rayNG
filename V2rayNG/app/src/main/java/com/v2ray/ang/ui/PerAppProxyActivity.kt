@@ -1,5 +1,6 @@
 package com.v2ray.ang.ui
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.text.TextUtils
 import android.util.Log
@@ -34,6 +35,7 @@ class PerAppProxyActivity : BaseActivity() {
     private var adapter: PerAppProxyAdapter? = null
     private var appsAll: List<AppInfo>? = null
 
+    @SuppressLint("CheckResult")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
@@ -70,13 +72,6 @@ class PerAppProxyActivity : BaseActivity() {
                     it.sortedWith(comparator)
                 }
             }
-//                .map {
-//                    val comparator = object : Comparator<AppInfo> {
-//                        val collator = Collator.getInstance()
-//                        override fun compare(o1: AppInfo, o2: AppInfo) = collator.compare(o1.appName, o2.appName)
-//                    }
-//                    it.sortedWith(comparator)
-//                }
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe {
                 appsAll = it
@@ -84,52 +79,6 @@ class PerAppProxyActivity : BaseActivity() {
                 binding.recyclerView.adapter = adapter
                 binding.pbWaiting.visibility = View.GONE
             }
-        /***
-        recycler_view.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-        var dst = 0
-        val threshold = resources.getDimensionPixelSize(R.dimen.bypass_list_header_height) * 2
-        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-        dst += dy
-        if (dst > threshold) {
-        header_view.hide()
-        dst = 0
-        } else if (dst < -20) {
-        header_view.show()
-        dst = 0
-        }
-        }
-
-        var hiding = false
-        fun View.hide() {
-        val target = -height.toFloat()
-        if (hiding || translationY == target) return
-        animate()
-        .translationY(target)
-        .setInterpolator(AccelerateInterpolator(2F))
-        .setListener(object : AnimatorListenerAdapter() {
-        override fun onAnimationEnd(animation: Animator?) {
-        hiding = false
-        }
-        })
-        hiding = true
-        }
-
-        var showing = false
-        fun View.show() {
-        val target = 0f
-        if (showing || translationY == target) return
-        animate()
-        .translationY(target)
-        .setInterpolator(DecelerateInterpolator(2F))
-        .setListener(object : AnimatorListenerAdapter() {
-        override fun onAnimationEnd(animation: Animator?) {
-        showing = false
-        }
-        })
-        showing = true
-        }
-        })
-         ***/
 
         binding.switchPerAppProxy.setOnCheckedChangeListener { _, isChecked ->
             MmkvManager.encodeSettings(AppConfig.PREF_PER_APP_PROXY, isChecked)
@@ -140,36 +89,6 @@ class PerAppProxyActivity : BaseActivity() {
             MmkvManager.encodeSettings(AppConfig.PREF_BYPASS_APPS, isChecked)
         }
         binding.switchBypassApps.isChecked = MmkvManager.decodeSettingsBool(AppConfig.PREF_BYPASS_APPS, false)
-
-        /***
-        et_search.setOnEditorActionListener { v, actionId, event ->
-        if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-        //hide
-        var imm: InputMethodManager = v.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.toggleSoftInput(0, InputMethodManager.HIDE_NOT_ALWAYS)
-
-        val key = v.text.toString().toUpperCase()
-        val apps = ArrayList<AppInfo>()
-        if (TextUtils.isEmpty(key)) {
-        appsAll?.forEach {
-        apps.add(it)
-        }
-        } else {
-        appsAll?.forEach {
-        if (it.appName.toUpperCase().indexOf(key) >= 0) {
-        apps.add(it)
-        }
-        }
-        }
-        adapter = PerAppProxyAdapter(this, apps, adapter?.blacklist)
-        recycler_view.adapter = adapter
-        adapter?.notifyDataSetChanged()
-        true
-        } else {
-        false
-        }
-        }
-         ***/
     }
 
     override fun onPause() {

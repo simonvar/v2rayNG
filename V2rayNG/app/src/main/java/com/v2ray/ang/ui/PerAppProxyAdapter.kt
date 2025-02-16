@@ -8,8 +8,11 @@ import com.v2ray.ang.R
 import com.v2ray.ang.databinding.ItemRecyclerBypassListBinding
 import com.v2ray.ang.dto.AppInfo
 
-class PerAppProxyAdapter(val activity: BaseActivity, val apps: List<AppInfo>, blacklist: MutableSet<String>?) :
-    RecyclerView.Adapter<PerAppProxyAdapter.BaseViewHolder>() {
+class PerAppProxyAdapter(
+    val activity: BaseActivity,
+    val apps: List<AppInfo>,
+    blacklist: MutableSet<String>?,
+) : RecyclerView.Adapter<PerAppProxyAdapter.BaseViewHolder>() {
 
     companion object {
         private const val VIEW_TYPE_HEADER = 0
@@ -33,27 +36,33 @@ class PerAppProxyAdapter(val activity: BaseActivity, val apps: List<AppInfo>, bl
         return when (viewType) {
             VIEW_TYPE_HEADER -> {
                 val view = View(ctx)
-                view.layoutParams = ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ctx.resources.getDimensionPixelSize(R.dimen.bypass_list_header_height) * 0
-                )
+                view.layoutParams =
+                    ViewGroup.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ctx.resources.getDimensionPixelSize(R.dimen.bypass_list_header_height) * 0,
+                    )
                 BaseViewHolder(view)
             }
-//            VIEW_TYPE_ITEM -> AppViewHolder(ctx.layoutInflater
-//                    .inflate(R.layout.item_recycler_bypass_list, parent, false))
+            //            VIEW_TYPE_ITEM -> AppViewHolder(ctx.layoutInflater
+            //                    .inflate(R.layout.item_recycler_bypass_list, parent, false))
 
-            else -> AppViewHolder(ItemRecyclerBypassListBinding.inflate(LayoutInflater.from(ctx), parent, false))
-
+            else ->
+                AppViewHolder(
+                    ItemRecyclerBypassListBinding.inflate(LayoutInflater.from(ctx), parent, false)
+                )
         }
     }
 
-    override fun getItemViewType(position: Int) = if (position == 0) VIEW_TYPE_HEADER else VIEW_TYPE_ITEM
+    override fun getItemViewType(position: Int) =
+        if (position == 0) VIEW_TYPE_HEADER else VIEW_TYPE_ITEM
 
     open class BaseViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
 
-    inner class AppViewHolder(private val itemBypassBinding: ItemRecyclerBypassListBinding) : BaseViewHolder(itemBypassBinding.root),
-        View.OnClickListener {
-        private val inBlacklist: Boolean get() = blacklist.contains(appInfo.packageName)
+    inner class AppViewHolder(private val itemBypassBinding: ItemRecyclerBypassListBinding) :
+        BaseViewHolder(itemBypassBinding.root), View.OnClickListener {
+        private val inBlacklist: Boolean
+            get() = blacklist.contains(appInfo.packageName)
+
         private lateinit var appInfo: AppInfo
 
         fun bind(appInfo: AppInfo) {
@@ -61,11 +70,12 @@ class PerAppProxyAdapter(val activity: BaseActivity, val apps: List<AppInfo>, bl
 
             // Set app icon and name
             itemBypassBinding.icon.setImageDrawable(appInfo.appIcon)
-            itemBypassBinding.name.text = if (appInfo.isSystemApp) {
-                String.format("** %s", appInfo.appName)
-            } else {
-                appInfo.appName
-            }
+            itemBypassBinding.name.text =
+                if (appInfo.isSystemApp) {
+                    String.format("** %s", appInfo.appName)
+                } else {
+                    appInfo.appName
+                }
 
             // Set package name and checkbox state
             itemBypassBinding.packageName.text = appInfo.packageName
@@ -74,7 +84,6 @@ class PerAppProxyAdapter(val activity: BaseActivity, val apps: List<AppInfo>, bl
             // Handle item click to toggle blacklist status
             itemView.setOnClickListener(this)
         }
-
 
         override fun onClick(v: View?) {
             if (inBlacklist) {

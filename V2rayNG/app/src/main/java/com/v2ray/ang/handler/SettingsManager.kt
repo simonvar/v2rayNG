@@ -9,11 +9,9 @@ import com.v2ray.ang.AppConfig.ANG_PACKAGE
 import com.v2ray.ang.AppConfig.GEOIP_PRIVATE
 import com.v2ray.ang.AppConfig.GEOSITE_PRIVATE
 import com.v2ray.ang.AppConfig.TAG_DIRECT
-import com.v2ray.ang.dto.EConfigType
 import com.v2ray.ang.dto.ProfileItem
 import com.v2ray.ang.dto.RoutingType
 import com.v2ray.ang.dto.RulesetItem
-import com.v2ray.ang.dto.V2rayConfig
 import com.v2ray.ang.handler.MmkvManager.decodeServerConfig
 import com.v2ray.ang.handler.MmkvManager.decodeServerList
 import com.v2ray.ang.util.JsonUtil
@@ -34,7 +32,10 @@ object SettingsManager {
         }
     }
 
-    private fun getPresetRoutingRulesets(context: Context, index: Int = 0): MutableList<RulesetItem>? {
+    private fun getPresetRoutingRulesets(
+        context: Context,
+        index: Int = 0,
+    ): MutableList<RulesetItem>? {
         val fileName = RoutingType.fromIndex(index).fileName
         val assets = Utils.readTextFromAssets(context, fileName)
         if (TextUtils.isEmpty(assets)) {
@@ -43,7 +44,6 @@ object SettingsManager {
 
         return JsonUtil.fromJson(assets, Array<RulesetItem>::class.java).toMutableList()
     }
-
 
     fun resetRoutingRulesetsFromPresets(context: Context, index: Int) {
         val rulesetList = getPresetRoutingRulesets(context, index) ?: return
@@ -56,7 +56,8 @@ object SettingsManager {
         }
 
         try {
-            val rulesetList = JsonUtil.fromJson(content, Array<RulesetItem>::class.java).toMutableList()
+            val rulesetList =
+                JsonUtil.fromJson(content, Array<RulesetItem>::class.java).toMutableList()
             if (rulesetList.isNullOrEmpty()) {
                 return false
             }
@@ -124,22 +125,14 @@ object SettingsManager {
             return false
         }
 
-        //Follow config
-        val guid = MmkvManager.getSelectServer() ?: return false
-        val config = MmkvManager.decodeServerConfig(guid) ?: return false
-        if (config.configType == EConfigType.CUSTOM) {
-            val raw = MmkvManager.decodeServerRaw(guid) ?: return false
-            val v2rayConfig = JsonUtil.fromJson(raw, V2rayConfig::class.java)
-            val exist = v2rayConfig.routing.rules.filter { it.outboundTag == TAG_DIRECT }?.any {
-                it.domain?.contains(GEOSITE_PRIVATE) == true || it.ip?.contains(GEOIP_PRIVATE) == true
-            }
-            return exist == true
-        }
-
         val rulesetItems = MmkvManager.decodeRoutingRulesets()
-        val exist = rulesetItems?.filter { it.enabled && it.outboundTag == TAG_DIRECT }?.any {
-            it.domain?.contains(GEOSITE_PRIVATE) == true || it.ip?.contains(GEOIP_PRIVATE) == true
-        }
+        val exist =
+            rulesetItems
+                ?.filter { it.enabled && it.outboundTag == TAG_DIRECT }
+                ?.any {
+                    it.domain?.contains(GEOSITE_PRIVATE) == true ||
+                        it.ip?.contains(GEOIP_PRIVATE) == true
+                }
         return exist == true
     }
 
@@ -174,7 +167,10 @@ object SettingsManager {
     }
 
     fun getSocksPort(): Int {
-        return parseInt(MmkvManager.decodeSettingsString(AppConfig.PREF_SOCKS_PORT), AppConfig.PORT_SOCKS.toInt())
+        return parseInt(
+            MmkvManager.decodeSettingsString(AppConfig.PREF_SOCKS_PORT),
+            AppConfig.PORT_SOCKS.toInt(),
+        )
     }
 
     fun getHttpPort(): Int {
@@ -186,24 +182,19 @@ object SettingsManager {
 
         try {
             val geo = arrayOf("geosite.dat", "geoip.dat")
-            assets.list("")
+            assets
+                .list("")
                 ?.filter { geo.contains(it) }
                 ?.filter { !File(extFolder, it).exists() }
                 ?.forEach {
                     val target = File(extFolder, it)
                     assets.open(it).use { input ->
-                        FileOutputStream(target).use { output ->
-                            input.copyTo(output)
-                        }
+                        FileOutputStream(target).use { output -> input.copyTo(output) }
                     }
-                    Log.i(
-                        ANG_PACKAGE,
-                        "Copied from apk assets folder to ${target.absolutePath}"
-                    )
+                    Log.i(ANG_PACKAGE, "Copied from apk assets folder to ${target.absolutePath}")
                 }
         } catch (e: Exception) {
             Log.e(ANG_PACKAGE, "asset copy failed", e)
         }
-
     }
 }

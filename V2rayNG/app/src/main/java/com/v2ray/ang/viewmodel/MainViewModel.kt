@@ -19,7 +19,6 @@ import com.v2ray.ang.dto.ProfileItem
 import com.v2ray.ang.dto.ServersCache
 import com.v2ray.ang.extension.serializable
 import com.v2ray.ang.extension.toast
-import com.v2ray.ang.fmt.CustomFmt
 import com.v2ray.ang.handler.AngConfigManager
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.handler.SettingsManager
@@ -78,26 +77,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         if (index >= 0) {
             serversCache.removeAt(index)
         }
-    }
-
-    fun appendCustomConfigServer(server: String): Boolean {
-        if (server.contains("inbounds")
-            && server.contains("outbounds")
-            && server.contains("routing")
-        ) {
-            try {
-                val config = CustomFmt.parse(server) ?: return false
-                config.subscriptionId = subscriptionId
-                val key = MmkvManager.encodeServerConfig("", config)
-                MmkvManager.encodeServerRaw(key, server)
-                serverList.add(0, key)
-                serversCache.add(0, ServersCache(key, config))
-                return true
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-        return false
     }
 
     fun swapServer(fromPosition: Int, toPosition: Int) {

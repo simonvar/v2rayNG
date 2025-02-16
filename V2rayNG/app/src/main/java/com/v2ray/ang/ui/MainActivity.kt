@@ -1,12 +1,9 @@
 package com.v2ray.ang.ui
 
-import android.Manifest
-import android.content.ActivityNotFoundException
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.ColorStateList
-import android.net.Uri
 import android.net.VpnService
-import android.os.Build
 import android.os.Bundle
 import android.text.TextUtils
 import android.view.KeyEvent
@@ -41,17 +38,16 @@ import com.v2ray.ang.util.Utils
 import com.v2ray.ang.viewmodel.MainViewModel
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.drakeet.support.toast.ToastCompat
-import java.util.concurrent.TimeUnit
 
 class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedListener {
-    private val binding by lazy {
-        ActivityMainBinding.inflate(layoutInflater)
-    }
+
+    private val binding by lazy { ActivityMainBinding.inflate(layoutInflater) }
 
     private val adapter by lazy { MainRecyclerAdapter(this) }
     private val requestVpnPermission =
@@ -64,20 +60,19 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             initGroupTab()
         }
-    private val tabGroupListener = object : TabLayout.OnTabSelectedListener {
-        override fun onTabSelected(tab: TabLayout.Tab?) {
-            val selectId = tab?.tag.toString()
-            if (selectId != mainViewModel.subscriptionId) {
-                mainViewModel.subscriptionIdChanged(selectId)
+    private val tabGroupListener =
+        object : TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: TabLayout.Tab?) {
+                val selectId = tab?.tag.toString()
+                if (selectId != mainViewModel.subscriptionId) {
+                    mainViewModel.subscriptionIdChanged(selectId)
+                }
             }
-        }
 
-        override fun onTabUnselected(tab: TabLayout.Tab?) {
-        }
+            override fun onTabUnselected(tab: TabLayout.Tab?) {}
 
-        override fun onTabReselected(tab: TabLayout.Tab?) {
+            override fun onTabReselected(tab: TabLayout.Tab?) {}
         }
-    }
     private var mItemTouchHelper: ItemTouchHelper? = null
     val mainViewModel: MainViewModel by viewModels()
 
@@ -106,7 +101,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                 setTestState(getString(R.string.connection_test_testing))
                 mainViewModel.testCurrentServerRealPing()
             } else {
-//                tv_test_state.text = getString(R.string.connection_test_fail)
+                //                tv_test_state.text = getString(R.string.connection_test_fail)
             }
         }
 
@@ -117,13 +112,14 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         mItemTouchHelper = ItemTouchHelper(SimpleItemTouchHelperCallback(adapter))
         mItemTouchHelper?.attachToRecyclerView(binding.recyclerView)
 
-        val toggle = ActionBarDrawerToggle(
-            this,
-            binding.drawerLayout,
-            binding.toolbar,
-            R.string.navigation_drawer_open,
-            R.string.navigation_drawer_close
-        )
+        val toggle =
+            ActionBarDrawerToggle(
+                this,
+                binding.drawerLayout,
+                binding.toolbar,
+                R.string.navigation_drawer_open,
+                R.string.navigation_drawer_close,
+            )
         binding.drawerLayout.addDrawerListener(toggle)
         toggle.syncState()
         binding.navView.setNavigationItemSelectedListener(this)
@@ -131,15 +127,18 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         initGroupTab()
         setupViewModel()
 
-        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
-                    binding.drawerLayout.closeDrawer(GravityCompat.START)
-                } else {
-                    onBackPressedDispatcher.onBackPressed()
+        onBackPressedDispatcher.addCallback(
+            this,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                        binding.drawerLayout.closeDrawer(GravityCompat.START)
+                    } else {
+                        onBackPressedDispatcher.onBackPressed()
+                    }
                 }
-            }
-        })
+            },
+        )
     }
 
     private fun setupViewModel() {
@@ -202,15 +201,14 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         V2RayServiceManager.startV2Ray(this)
     }
 
+    @SuppressLint("CheckResult")
     fun restartV2Ray() {
         if (mainViewModel.isRunning.value == true) {
             Utils.stopVService(this)
         }
         Observable.timer(500, TimeUnit.MILLISECONDS)
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe {
-                startV2Ray()
-            }
+            .subscribe { startV2Ray() }
     }
 
     public override fun onResume() {
@@ -228,14 +226,16 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         val searchItem = menu.findItem(R.id.search_view)
         if (searchItem != null) {
             val searchView = searchItem.actionView as SearchView
-            searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-                override fun onQueryTextSubmit(query: String?): Boolean = false
+            searchView.setOnQueryTextListener(
+                object : SearchView.OnQueryTextListener {
+                    override fun onQueryTextSubmit(query: String?): Boolean = false
 
-                override fun onQueryTextChange(newText: String?): Boolean {
-                    mainViewModel.filterConfig(newText.orEmpty())
-                    return false
+                    override fun onQueryTextChange(newText: String?): Boolean {
+                        mainViewModel.filterConfig(newText.orEmpty())
+                        return false
+                    }
                 }
-            })
+            )
 
             searchView.setOnCloseListener {
                 mainViewModel.filterConfig("")
@@ -245,199 +245,171 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         return super.onCreateOptionsMenu(menu)
     }
 
-    override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
-        R.id.import_qrcode -> {
-            importQRcode(true)
-            true
-        }
-
-        R.id.import_clipboard -> {
-            importClipboard()
-            true
-        }
-
-        R.id.import_manually_vmess -> {
-            importManually(EConfigType.VMESS.value)
-            true
-        }
-
-        R.id.import_manually_vless -> {
-            importManually(EConfigType.VLESS.value)
-            true
-        }
-
-        R.id.import_manually_ss -> {
-            importManually(EConfigType.SHADOWSOCKS.value)
-            true
-        }
-
-        R.id.import_manually_socks -> {
-            importManually(EConfigType.SOCKS.value)
-            true
-        }
-
-        R.id.import_manually_http -> {
-            importManually(EConfigType.HTTP.value)
-            true
-        }
-
-        R.id.import_manually_trojan -> {
-            importManually(EConfigType.TROJAN.value)
-            true
-        }
-
-        R.id.import_manually_wireguard -> {
-            importManually(EConfigType.WIREGUARD.value)
-            true
-        }
-
-        R.id.import_manually_hysteria2 -> {
-            importManually(EConfigType.HYSTERIA2.value)
-            true
-        }
-
-        R.id.import_config_custom_clipboard -> {
-            importConfigCustomClipboard()
-            true
-        }
-
-        R.id.import_config_custom_local -> {
-            importConfigCustomLocal()
-            true
-        }
-
-        R.id.import_config_custom_url -> {
-            importConfigCustomUrlClipboard()
-            true
-        }
-
-        R.id.import_config_custom_url_scan -> {
-            importQRcode(false)
-            true
-        }
-
-        R.id.sub_update -> {
-            importConfigViaSub()
-            true
-        }
-
-        R.id.export_all -> {
-            binding.pbWaiting.show()
-            lifecycleScope.launch(Dispatchers.IO) {
-                val ret = mainViewModel.exportAllServer()
-                launch(Dispatchers.Main) {
-                    if (ret > 0)
-                        toast(getString(R.string.title_export_config_count, ret))
-                    else
-                        toast(R.string.toast_failure)
-                    binding.pbWaiting.hide()
-                }
+    override fun onOptionsItemSelected(item: MenuItem) =
+        when (item.itemId) {
+            R.id.import_qrcode -> {
+                importQRcode(true)
+                true
             }
 
-            true
-        }
-
-        R.id.ping_all -> {
-            toast(
-                getString(
-                    R.string.connection_test_testing_count,
-                    mainViewModel.serversCache.count()
-                )
-            )
-            mainViewModel.testAllTcping()
-            true
-        }
-
-        R.id.real_ping_all -> {
-            toast(
-                getString(
-                    R.string.connection_test_testing_count,
-                    mainViewModel.serversCache.count()
-                )
-            )
-            mainViewModel.testAllRealPing()
-            true
-        }
-
-        R.id.service_restart -> {
-            restartV2Ray()
-            true
-        }
-
-        R.id.del_all_config -> {
-            AlertDialog.Builder(this).setMessage(R.string.del_config_comfirm)
-                .setPositiveButton(android.R.string.ok) { _, _ ->
-                    binding.pbWaiting.show()
-                    lifecycleScope.launch(Dispatchers.IO) {
-                        val ret = mainViewModel.removeAllServer()
-                        launch(Dispatchers.Main) {
-                            mainViewModel.reloadServerList()
-                            toast(getString(R.string.title_del_config_count, ret))
-                            binding.pbWaiting.hide()
-                        }
-                    }
-                }
-                .setNegativeButton(android.R.string.cancel) { _, _ ->
-                    //do noting
-                }
-                .show()
-            true
-        }
-
-        R.id.del_duplicate_config -> {
-            AlertDialog.Builder(this).setMessage(R.string.del_config_comfirm)
-                .setPositiveButton(android.R.string.ok) { _, _ ->
-                    binding.pbWaiting.show()
-                    lifecycleScope.launch(Dispatchers.IO) {
-                        val ret = mainViewModel.removeDuplicateServer()
-                        launch(Dispatchers.Main) {
-                            mainViewModel.reloadServerList()
-                            toast(getString(R.string.title_del_duplicate_config_count, ret))
-                            binding.pbWaiting.hide()
-                        }
-                    }
-                }
-                .setNegativeButton(android.R.string.cancel) { _, _ ->
-                    //do noting
-                }
-                .show()
-            true
-        }
-
-        R.id.del_invalid_config -> {
-            AlertDialog.Builder(this).setMessage(R.string.del_invalid_config_comfirm)
-                .setPositiveButton(android.R.string.ok) { _, _ ->
-                    binding.pbWaiting.show()
-                    lifecycleScope.launch(Dispatchers.IO) {
-                        val ret = mainViewModel.removeInvalidServer()
-                        launch(Dispatchers.Main) {
-                            mainViewModel.reloadServerList()
-                            toast(getString(R.string.title_del_config_count, ret))
-                            binding.pbWaiting.hide()
-                        }
-                    }
-                }
-                .setNegativeButton(android.R.string.cancel) { _, _ ->
-                    //do noting
-                }
-                .show()
-            true
-        }
-
-        R.id.sort_by_test_results -> {
-            binding.pbWaiting.show()
-            lifecycleScope.launch(Dispatchers.IO) {
-                mainViewModel.sortByTestResults()
-                launch(Dispatchers.Main) {
-                    mainViewModel.reloadServerList()
-                    binding.pbWaiting.hide()
-                }
+            R.id.import_clipboard -> {
+                importClipboard()
+                true
             }
-            true
-        }
 
-        else -> super.onOptionsItemSelected(item)
-    }
+            R.id.import_manually_vmess -> {
+                importManually(EConfigType.VMESS.value)
+                true
+            }
+
+            R.id.import_manually_vless -> {
+                importManually(EConfigType.VLESS.value)
+                true
+            }
+
+            R.id.import_manually_ss -> {
+                importManually(EConfigType.SHADOWSOCKS.value)
+                true
+            }
+
+            R.id.import_manually_socks -> {
+                importManually(EConfigType.SOCKS.value)
+                true
+            }
+
+            R.id.import_manually_trojan -> {
+                importManually(EConfigType.TROJAN.value)
+                true
+            }
+
+            R.id.import_manually_wireguard -> {
+                importManually(EConfigType.WIREGUARD.value)
+                true
+            }
+
+            R.id.sub_update -> {
+                importConfigViaSub()
+                true
+            }
+
+            R.id.export_all -> {
+                binding.pbWaiting.show()
+                lifecycleScope.launch(Dispatchers.IO) {
+                    val ret = mainViewModel.exportAllServer()
+                    launch(Dispatchers.Main) {
+                        if (ret > 0) toast(getString(R.string.title_export_config_count, ret))
+                        else toast(R.string.toast_failure)
+                        binding.pbWaiting.hide()
+                    }
+                }
+
+                true
+            }
+
+            R.id.ping_all -> {
+                toast(
+                    getString(
+                        R.string.connection_test_testing_count,
+                        mainViewModel.serversCache.count(),
+                    )
+                )
+                mainViewModel.testAllTcping()
+                true
+            }
+
+            R.id.real_ping_all -> {
+                toast(
+                    getString(
+                        R.string.connection_test_testing_count,
+                        mainViewModel.serversCache.count(),
+                    )
+                )
+                mainViewModel.testAllRealPing()
+                true
+            }
+
+            R.id.service_restart -> {
+                restartV2Ray()
+                true
+            }
+
+            R.id.del_all_config -> {
+                AlertDialog.Builder(this)
+                    .setMessage(R.string.del_config_comfirm)
+                    .setPositiveButton(android.R.string.ok) { _, _ ->
+                        binding.pbWaiting.show()
+                        lifecycleScope.launch(Dispatchers.IO) {
+                            val ret = mainViewModel.removeAllServer()
+                            launch(Dispatchers.Main) {
+                                mainViewModel.reloadServerList()
+                                toast(getString(R.string.title_del_config_count, ret))
+                                binding.pbWaiting.hide()
+                            }
+                        }
+                    }
+                    .setNegativeButton(android.R.string.cancel) { _, _ ->
+                        // do noting
+                    }
+                    .show()
+                true
+            }
+
+            R.id.del_duplicate_config -> {
+                AlertDialog.Builder(this)
+                    .setMessage(R.string.del_config_comfirm)
+                    .setPositiveButton(android.R.string.ok) { _, _ ->
+                        binding.pbWaiting.show()
+                        lifecycleScope.launch(Dispatchers.IO) {
+                            val ret = mainViewModel.removeDuplicateServer()
+                            launch(Dispatchers.Main) {
+                                mainViewModel.reloadServerList()
+                                toast(getString(R.string.title_del_duplicate_config_count, ret))
+                                binding.pbWaiting.hide()
+                            }
+                        }
+                    }
+                    .setNegativeButton(android.R.string.cancel) { _, _ ->
+                        // do noting
+                    }
+                    .show()
+                true
+            }
+
+            R.id.del_invalid_config -> {
+                AlertDialog.Builder(this)
+                    .setMessage(R.string.del_invalid_config_comfirm)
+                    .setPositiveButton(android.R.string.ok) { _, _ ->
+                        binding.pbWaiting.show()
+                        lifecycleScope.launch(Dispatchers.IO) {
+                            val ret = mainViewModel.removeInvalidServer()
+                            launch(Dispatchers.Main) {
+                                mainViewModel.reloadServerList()
+                                toast(getString(R.string.title_del_config_count, ret))
+                                binding.pbWaiting.hide()
+                            }
+                        }
+                    }
+                    .setNegativeButton(android.R.string.cancel) { _, _ ->
+                        // do noting
+                    }
+                    .show()
+                true
+            }
+
+            R.id.sort_by_test_results -> {
+                binding.pbWaiting.show()
+                lifecycleScope.launch(Dispatchers.IO) {
+                    mainViewModel.sortByTestResults()
+                    launch(Dispatchers.Main) {
+                        mainViewModel.reloadServerList()
+                        binding.pbWaiting.hide()
+                    }
+                }
+                true
+            }
+
+            else -> super.onOptionsItemSelected(item)
+        }
 
     private fun importManually(createConfigType: Int) {
         startActivity(
@@ -448,14 +420,9 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         )
     }
 
-    /**
-     * import config from qrcode
-     */
+    /** import config from qrcode */
     private fun importQRcode(forConfig: Boolean): Boolean {
-        if (forConfig)
-            scanQRCodeForConfig.launch(Intent(this, ScannerActivity::class.java))
-        else
-            scanQRCodeForUrlToCustomConfig.launch(Intent(this, ScannerActivity::class.java))
+        scanQRCodeForConfig.launch(Intent(this, ScannerActivity::class.java))
 
         return true
     }
@@ -467,18 +434,8 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             }
         }
 
-    private val scanQRCodeForUrlToCustomConfig =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            if (it.resultCode == RESULT_OK) {
-                importConfigCustomUrl(it.data?.getStringExtra("SCAN_RESULT"))
-            }
-        }
-
-    /**
-     * import config from clipboard
-     */
-    private fun importClipboard()
-            : Boolean {
+    /** import config from clipboard */
+    private fun importClipboard(): Boolean {
         try {
             val clipboard = Utils.getClipboard(this)
             importBatchConfig(clipboard)
@@ -494,11 +451,8 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
 
         lifecycleScope.launch(Dispatchers.IO) {
             try {
-                val (count, countSub) = AngConfigManager.importBatchConfig(
-                    server,
-                    mainViewModel.subscriptionId,
-                    true
-                )
+                val (count, countSub) =
+                    AngConfigManager.importBatchConfig(server, mainViewModel.subscriptionId, true)
                 delay(500L)
                 withContext(Dispatchers.Main) {
                     when {
@@ -522,86 +476,8 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         }
     }
 
-
-    private fun importConfigCustomClipboard()
-            : Boolean {
-        try {
-            val configText = Utils.getClipboard(this)
-            if (TextUtils.isEmpty(configText)) {
-                toast(R.string.toast_none_data_clipboard)
-                return false
-            }
-            importCustomizeConfig(configText)
-            return true
-        } catch (e: Exception) {
-            e.printStackTrace()
-            return false
-        }
-    }
-
-    /**
-     * import config from local config file
-     */
-    private fun importConfigCustomLocal(): Boolean {
-        try {
-            showFileChooser()
-        } catch (e: Exception) {
-            e.printStackTrace()
-            return false
-        }
-        return true
-    }
-
-    private fun importConfigCustomUrlClipboard()
-            : Boolean {
-        try {
-            val url = Utils.getClipboard(this)
-            if (TextUtils.isEmpty(url)) {
-                toast(R.string.toast_none_data_clipboard)
-                return false
-            }
-            return importConfigCustomUrl(url)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            return false
-        }
-    }
-
-    /**
-     * import config from url
-     */
-    private fun importConfigCustomUrl(url: String?): Boolean {
-        try {
-            if (!Utils.isValidUrl(url)) {
-                toast(R.string.toast_invalid_url)
-                return false
-            }
-            lifecycleScope.launch(Dispatchers.IO) {
-                val configText = try {
-                    Utils.getUrlContentWithCustomUserAgent(url)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    ""
-                }
-                launch(Dispatchers.Main) {
-                    importCustomizeConfig(configText)
-                }
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            return false
-        }
-        return true
-    }
-
-    /**
-     * import config from sub
-     */
+    /** import config from sub */
     private fun importConfigViaSub(): Boolean {
-//        val dialog = AlertDialog.Builder(this)
-//            .setView(LayoutProgressBinding.inflate(layoutInflater).root)
-//            .setCancelable(false)
-//            .show()
         binding.pbWaiting.show()
 
         lifecycleScope.launch(Dispatchers.IO) {
@@ -614,79 +490,11 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                 } else {
                     toast(R.string.toast_failure)
                 }
-                //dialog.dismiss()
+                // dialog.dismiss()
                 binding.pbWaiting.hide()
             }
         }
         return true
-    }
-
-    /**
-     * show file chooser
-     */
-    private fun showFileChooser() {
-        val intent = Intent(Intent.ACTION_GET_CONTENT)
-        intent.type = "*/*"
-        intent.addCategory(Intent.CATEGORY_OPENABLE)
-
-        try {
-            chooseFileForCustomConfig.launch(
-                Intent.createChooser(
-                    intent,
-                    getString(R.string.title_file_chooser)
-                )
-            )
-        } catch (ex: ActivityNotFoundException) {
-            toast(R.string.toast_require_file_manager)
-        }
-    }
-
-    private val chooseFileForCustomConfig =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            val uri = it.data?.data
-            if (it.resultCode == RESULT_OK && uri != null) {
-                readContentFromUri(uri)
-            }
-        }
-
-    /**
-     * read content from uri
-     */
-    private fun readContentFromUri(uri: Uri) {
-        try {
-            contentResolver.openInputStream(uri).use { input ->
-                importCustomizeConfig(input?.bufferedReader()?.readText())
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-
-    /**
-     * import customize config
-     */
-    private fun importCustomizeConfig(server: String?) {
-        try {
-            if (server == null || TextUtils.isEmpty(server)) {
-                toast(R.string.toast_none_data)
-                return
-            }
-            if (mainViewModel.appendCustomConfigServer(server)) {
-                mainViewModel.reloadServerList()
-                toast(R.string.toast_success)
-            } else {
-                toast(R.string.toast_failure)
-            }
-            //adapter.notifyItemInserted(mainViewModel.serverList.lastIndex)
-        } catch (e: Exception) {
-            ToastCompat.makeText(
-                this,
-                "${getString(R.string.toast_malformed_josn)} ${e.cause?.message}",
-                Toast.LENGTH_LONG
-            ).show()
-            e.printStackTrace()
-            return
-        }
     }
 
     private fun setTestState(content: String?) {
@@ -700,7 +508,6 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         }
         return super.onKeyDown(keyCode, event)
     }
-
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         // Handle navigation view item clicks here.
@@ -720,11 +527,10 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                 requestSubSettingActivity.launch(Intent(this, RoutingSettingActivity::class.java))
             }
 
-
             R.id.promotion -> {
                 Utils.openUri(
                     this,
-                    "${Utils.decode(AppConfig.PromotionUrl)}?t=${System.currentTimeMillis()}"
+                    "${Utils.decode(AppConfig.PromotionUrl)}?t=${System.currentTimeMillis()}",
                 )
             }
 

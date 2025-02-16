@@ -22,26 +22,24 @@ object JsonUtil {
     }
 
     fun toJsonPretty(src: Any?): String? {
-        if (src == null)
-            return null
-        val gsonPre = GsonBuilder()
-            .setPrettyPrinting()
-            .disableHtmlEscaping()
-            .registerTypeAdapter( // custom serializer is needed here since JSON by default parse number as Double, core will fail to start
-                object : TypeToken<Double>() {}.type,
-                JsonSerializer { src: Double?, _: Type?, _: JsonSerializationContext? ->
-                    JsonPrimitive(
-                        src?.toInt()
-                    )
-                }
-            )
-            .create()
+        if (src == null) return null
+        val gsonPre =
+            GsonBuilder()
+                .setPrettyPrinting()
+                .disableHtmlEscaping()
+                .registerTypeAdapter( // custom serializer is needed here since JSON by default
+                                      // parse number as Double, core will fail to start
+                    object : TypeToken<Double>() {}.type,
+                    JsonSerializer { src: Double?, _: Type?, _: JsonSerializationContext? ->
+                        JsonPrimitive(src?.toInt())
+                    },
+                )
+                .create()
         return gsonPre.toJson(src)
     }
 
     fun parseString(src: String?): JsonObject? {
-        if (src == null)
-            return null
+        if (src == null) return null
         try {
             return JsonParser.parseString(src).getAsJsonObject()
         } catch (e: Exception) {

@@ -16,6 +16,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class SubEditActivity : BaseActivity() {
+
     private val binding by lazy { ActivitySubEditBinding.inflate(layoutInflater) }
 
     var del_config: MenuItem? = null
@@ -36,9 +37,7 @@ class SubEditActivity : BaseActivity() {
         }
     }
 
-    /**
-     * bingding seleced server config
-     */
+    /** bingding seleced server config */
     private fun bindingServer(subItem: SubscriptionItem): Boolean {
         binding.etRemarks.text = Utils.getEditable(subItem.remarks)
         binding.etUrl.text = Utils.getEditable(subItem.url)
@@ -50,9 +49,7 @@ class SubEditActivity : BaseActivity() {
         return true
     }
 
-    /**
-     * clear or init server config
-     */
+    /** clear or init server config */
     private fun clearServer(): Boolean {
         binding.etRemarks.text = null
         binding.etUrl.text = null
@@ -63,9 +60,7 @@ class SubEditActivity : BaseActivity() {
         return true
     }
 
-    /**
-     * save server config
-     */
+    /** save server config */
     private fun saveServer(): Boolean {
         val subItem = MmkvManager.decodeSubscription(editSubId) ?: SubscriptionItem()
 
@@ -89,7 +84,7 @@ class SubEditActivity : BaseActivity() {
 
             if (!Utils.isValidSubUrl(subItem.url)) {
                 toast(R.string.toast_insecure_url_protocol)
-                //return false
+                // return false
             }
         }
 
@@ -99,18 +94,15 @@ class SubEditActivity : BaseActivity() {
         return true
     }
 
-    /**
-     * save server config
-     */
+    /** save server config */
     private fun deleteServer(): Boolean {
         if (editSubId.isNotEmpty()) {
-            AlertDialog.Builder(this).setMessage(R.string.del_config_comfirm)
+            AlertDialog.Builder(this)
+                .setMessage(R.string.del_config_comfirm)
                 .setPositiveButton(android.R.string.ok) { _, _ ->
                     lifecycleScope.launch(Dispatchers.IO) {
                         MmkvManager.removeSubscription(editSubId)
-                        launch(Dispatchers.Main) {
-                            finish()
-                        }
+                        launch(Dispatchers.Main) { finish() }
                     }
                 }
                 .setNegativeButton(android.R.string.cancel) { _, _ ->
@@ -133,18 +125,18 @@ class SubEditActivity : BaseActivity() {
         return super.onCreateOptionsMenu(menu)
     }
 
-    override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
-        R.id.del_config -> {
-            deleteServer()
-            true
+    override fun onOptionsItemSelected(item: MenuItem) =
+        when (item.itemId) {
+            R.id.del_config -> {
+                deleteServer()
+                true
+            }
+
+            R.id.save_config -> {
+                saveServer()
+                true
+            }
+
+            else -> super.onOptionsItemSelected(item)
         }
-
-        R.id.save_config -> {
-            saveServer()
-            true
-        }
-
-        else -> super.onOptionsItemSelected(item)
-    }
-
 }

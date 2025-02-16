@@ -1,8 +1,6 @@
 package com.v2ray.ang
 
 import android.content.Context
-import android.content.pm.PackageManager
-import android.os.Build
 import androidx.multidex.MultiDexApplication
 import androidx.work.Configuration
 import androidx.work.WorkManager
@@ -12,8 +10,8 @@ import com.v2ray.ang.handler.SettingsManager
 import com.v2ray.ang.util.Utils
 
 class AngApplication : MultiDexApplication() {
+
     companion object {
-        //const val PREF_LAST_VERSION = "pref_last_version"
         lateinit var application: AngApplication
     }
 
@@ -22,9 +20,8 @@ class AngApplication : MultiDexApplication() {
         application = this
     }
 
-    private val workManagerConfiguration: Configuration = Configuration.Builder()
-        .setDefaultProcessName("${ANG_PACKAGE}:bg")
-        .build()
+    private val workManagerConfiguration: Configuration =
+        Configuration.Builder().setDefaultProcessName("${ANG_PACKAGE}:bg").build()
 
     override fun onCreate() {
         super.onCreate()

@@ -19,7 +19,8 @@ import com.v2ray.ang.helper.ItemTouchHelperViewHolder
 import com.v2ray.ang.util.QRCodeDecoder
 import com.v2ray.ang.util.Utils
 
-class SubSettingRecyclerAdapter(val activity: SubSettingActivity) : RecyclerView.Adapter<SubSettingRecyclerAdapter.MainViewHolder>(), ItemTouchHelperAdapter {
+class SubSettingRecyclerAdapter(val activity: SubSettingActivity) :
+    RecyclerView.Adapter<SubSettingRecyclerAdapter.MainViewHolder>(), ItemTouchHelperAdapter {
 
     private var mActivity: SubSettingActivity = activity
 
@@ -39,8 +40,7 @@ class SubSettingRecyclerAdapter(val activity: SubSettingActivity) : RecyclerView
 
         holder.itemSubSettingBinding.layoutEdit.setOnClickListener {
             mActivity.startActivity(
-                Intent(mActivity, SubEditActivity::class.java)
-                    .putExtra("subId", subId)
+                Intent(mActivity, SubEditActivity::class.java).putExtra("subId", subId)
             )
         }
 
@@ -48,7 +48,6 @@ class SubSettingRecyclerAdapter(val activity: SubSettingActivity) : RecyclerView
             if (!it.isPressed) return@setOnCheckedChangeListener
             subItem.enabled = isChecked
             MmkvManager.encodeSubscription(subId, subItem)
-
         }
 
         if (TextUtils.isEmpty(subItem.url)) {
@@ -63,10 +62,7 @@ class SubSettingRecyclerAdapter(val activity: SubSettingActivity) : RecyclerView
                                     val ivBinding =
                                         ItemQrcodeBinding.inflate(LayoutInflater.from(mActivity))
                                     ivBinding.ivQcode.setImageBitmap(
-                                        QRCodeDecoder.createQRCode(
-                                            subItem.url
-
-                                        )
+                                        QRCodeDecoder.createQRCode(subItem.url)
                                     )
                                     AlertDialog.Builder(mActivity).setView(ivBinding.root).show()
                                 }
@@ -80,7 +76,8 @@ class SubSettingRecyclerAdapter(val activity: SubSettingActivity) : RecyclerView
                         } catch (e: Exception) {
                             e.printStackTrace()
                         }
-                    }.show()
+                    }
+                    .show()
             }
         }
     }
@@ -90,7 +87,7 @@ class SubSettingRecyclerAdapter(val activity: SubSettingActivity) : RecyclerView
             ItemRecyclerSubSettingBinding.inflate(
                 LayoutInflater.from(parent.context),
                 parent,
-                false
+                false,
             )
         )
     }
@@ -118,6 +115,5 @@ class SubSettingRecyclerAdapter(val activity: SubSettingActivity) : RecyclerView
         mActivity.refreshData()
     }
 
-    override fun onItemDismiss(position: Int) {
-    }
+    override fun onItemDismiss(position: Int) {}
 }

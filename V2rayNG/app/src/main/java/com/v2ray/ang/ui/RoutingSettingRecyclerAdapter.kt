@@ -12,17 +12,19 @@ import com.v2ray.ang.handler.SettingsManager
 import com.v2ray.ang.helper.ItemTouchHelperAdapter
 import com.v2ray.ang.helper.ItemTouchHelperViewHolder
 
-class RoutingSettingRecyclerAdapter(val activity: RoutingSettingActivity) : RecyclerView.Adapter<RoutingSettingRecyclerAdapter.MainViewHolder>(),
-    ItemTouchHelperAdapter {
+class RoutingSettingRecyclerAdapter(val activity: RoutingSettingActivity) :
+    RecyclerView.Adapter<RoutingSettingRecyclerAdapter.MainViewHolder>(), ItemTouchHelperAdapter {
 
     private var mActivity: RoutingSettingActivity = activity
+
     override fun getItemCount() = mActivity.rulesets.size
 
     override fun onBindViewHolder(holder: MainViewHolder, position: Int) {
         val ruleset = mActivity.rulesets[position]
 
         holder.itemRoutingSettingBinding.remarks.text = ruleset.remarks
-        holder.itemRoutingSettingBinding.domainIp.text = (ruleset.domain ?: ruleset.ip ?: ruleset.port)?.toString()
+        holder.itemRoutingSettingBinding.domainIp.text =
+            (ruleset.domain ?: ruleset.ip ?: ruleset.port)?.toString()
         holder.itemRoutingSettingBinding.outboundTag.text = ruleset.outboundTag
         holder.itemRoutingSettingBinding.chkEnable.isChecked = ruleset.enabled
         holder.itemRoutingSettingBinding.imgLocked.isVisible = ruleset.locked == true
@@ -30,8 +32,7 @@ class RoutingSettingRecyclerAdapter(val activity: RoutingSettingActivity) : Recy
 
         holder.itemRoutingSettingBinding.layoutEdit.setOnClickListener {
             mActivity.startActivity(
-                Intent(mActivity, RoutingEditActivity::class.java)
-                    .putExtra("position", position)
+                Intent(mActivity, RoutingEditActivity::class.java).putExtra("position", position)
             )
         }
 
@@ -47,7 +48,7 @@ class RoutingSettingRecyclerAdapter(val activity: RoutingSettingActivity) : Recy
             ItemRecyclerRoutingSettingBinding.inflate(
                 LayoutInflater.from(parent.context),
                 parent,
-                false
+                false,
             )
         )
     }
@@ -75,6 +76,5 @@ class RoutingSettingRecyclerAdapter(val activity: RoutingSettingActivity) : Recy
         mActivity.refreshData()
     }
 
-    override fun onItemDismiss(position: Int) {
-    }
+    override fun onItemDismiss(position: Int) {}
 }

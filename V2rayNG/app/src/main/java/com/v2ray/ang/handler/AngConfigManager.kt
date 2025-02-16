@@ -5,11 +5,8 @@ import android.graphics.Bitmap
 import android.text.TextUtils
 import android.util.Log
 import com.v2ray.ang.AppConfig
-import com.v2ray.ang.AppConfig.HY2
 import com.v2ray.ang.R
 import com.v2ray.ang.dto.*
-import com.v2ray.ang.fmt.CustomFmt
-import com.v2ray.ang.fmt.Hysteria2Fmt
 import com.v2ray.ang.fmt.ShadowsocksFmt
 import com.v2ray.ang.fmt.SocksFmt
 import com.v2ray.ang.fmt.TrojanFmt
@@ -48,8 +45,6 @@ object AngConfigManager {
                 VlessFmt.parse(str)
             } else if (str.startsWith(EConfigType.WIREGUARD.protocolScheme)) {
                 WireguardFmt.parse(str)
-            } else if (str.startsWith(EConfigType.HYSTERIA2.protocolScheme) || str.startsWith(HY2)) {
-                Hysteria2Fmt.parse(str)
             } else {
                 null
             }
@@ -87,14 +82,11 @@ object AngConfigManager {
 
             return config.configType.protocolScheme + when (config.configType) {
                 EConfigType.VMESS -> VmessFmt.toUri(config)
-                EConfigType.CUSTOM -> ""
                 EConfigType.SHADOWSOCKS -> ShadowsocksFmt.toUri(config)
                 EConfigType.SOCKS -> SocksFmt.toUri(config)
-                EConfigType.HTTP -> ""
                 EConfigType.VLESS -> VlessFmt.toUri(config)
                 EConfigType.TROJAN -> TrojanFmt.toUri(config)
                 EConfigType.WIREGUARD -> WireguardFmt.toUri(config)
-                EConfigType.HYSTERIA2 -> Hysteria2Fmt.toUri(config)
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -170,13 +162,6 @@ object AngConfigManager {
             if (guid == null) return -1
             val result = V2rayConfigManager.getV2rayConfig(context, guid)
             if (result.status) {
-                val config = MmkvManager.decodeServerConfig(guid)
-                if (config?.configType == EConfigType.HYSTERIA2) {
-                    val socksPort = Utils.findFreePort(listOf(100 + SettingsManager.getSocksPort(), 0))
-                    val hy2Config = Hysteria2Fmt.toNativeConfig(config, socksPort)
-                    Utils.setClipboard(context, JsonUtil.toJsonPretty(hy2Config) + "\n" + result.content)
-                    return 0
-                }
                 Utils.setClipboard(context, result.content)
             } else {
                 return -1
@@ -277,35 +262,6 @@ object AngConfigManager {
             && server.contains("outbounds")
             && server.contains("routing")
         ) {
-            try {
-                val serverList: Array<Any> =
-                    JsonUtil.fromJson(server, Array<Any>::class.java)
-
-                if (serverList.isNotEmpty()) {
-                    var count = 0
-                    for (srv in serverList.reversed()) {
-                        val config = CustomFmt.parse(JsonUtil.toJson(srv)) ?: continue
-                        config.subscriptionId = subid
-                        val key = MmkvManager.encodeServerConfig("", config)
-                        MmkvManager.encodeServerRaw(key, JsonUtil.toJsonPretty(srv) ?: "")
-                        count += 1
-                    }
-                    return count
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-
-            try {
-                // For compatibility
-                val config = CustomFmt.parse(server) ?: return 0
-                config.subscriptionId = subid
-                val key = MmkvManager.encodeServerConfig("", config)
-                MmkvManager.encodeServerRaw(key, server)
-                return 1
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
             return 0
         } else if (server.startsWith("[Interface]") && server.contains("[Peer]")) {
             try {

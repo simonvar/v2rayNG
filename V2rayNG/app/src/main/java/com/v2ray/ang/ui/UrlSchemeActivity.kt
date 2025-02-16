@@ -9,13 +9,13 @@ import com.v2ray.ang.R
 import com.v2ray.ang.databinding.ActivityLogcatBinding
 import com.v2ray.ang.extension.toast
 import com.v2ray.ang.handler.AngConfigManager
+import java.net.URLDecoder
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.net.URLDecoder
 
 class UrlSchemeActivity : BaseActivity() {
+
     private val binding by lazy { ActivityLogcatBinding.inflate(layoutInflater) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,9 +26,7 @@ class UrlSchemeActivity : BaseActivity() {
             intent.apply {
                 if (action == Intent.ACTION_SEND) {
                     if ("text/plain" == type) {
-                        intent.getStringExtra(Intent.EXTRA_TEXT)?.let {
-                            parseUri(it, null)
-                        }
+                        intent.getStringExtra(Intent.EXTRA_TEXT)?.let { parseUri(it, null) }
                     }
                 } else if (action == Intent.ACTION_VIEW) {
                     when (data?.host) {

@@ -7,6 +7,7 @@ import com.v2ray.ang.dto.AppInfo
 import io.reactivex.rxjava3.core.Observable
 
 object AppManagerUtil {
+
     private fun loadNetworkAppList(ctx: Context): ArrayList<AppInfo> {
         val packageManager = ctx.packageManager
         val packages = packageManager.getInstalledPackages(PackageManager.GET_PERMISSIONS)
@@ -27,13 +28,5 @@ object AppManagerUtil {
     }
 
     fun rxLoadNetworkAppList(ctx: Context): Observable<ArrayList<AppInfo>> =
-        Observable.unsafeCreate {
-            it.onNext(loadNetworkAppList(ctx))
-        }
-
-//    val PackageInfo.hasInternetPermission: Boolean
-//        get() {
-//            val permissions = requestedPermissions
-//            return permissions?.any { it == Manifest.permission.INTERNET } ?: false
-//        }
+        Observable.unsafeCreate { it.onNext(loadNetworkAppList(ctx)) }
 }

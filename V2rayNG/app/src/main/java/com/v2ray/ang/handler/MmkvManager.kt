@@ -28,7 +28,6 @@ object MmkvManager {
     private const val KEY_ANG_CONFIGS = "ANG_CONFIGS"
     private const val KEY_SUB_IDS = "SUB_IDS"
 
-    //private val profileStorage by lazy { MMKV.mmkvWithID(ID_PROFILE_CONFIG, MMKV.MULTI_PROCESS_MODE) }
     private val mainStorage by lazy { MMKV.mmkvWithID(ID_MAIN, MMKV.MULTI_PROCESS_MODE) }
     private val profileFullStorage by lazy { MMKV.mmkvWithID(ID_PROFILE_FULL_CONFIG, MMKV.MULTI_PROCESS_MODE) }
     private val serverRawStorage by lazy { MMKV.mmkvWithID(ID_SERVER_RAW, MMKV.MULTI_PROCESS_MODE) }
@@ -74,17 +73,6 @@ object MmkvManager {
         return JsonUtil.fromJson(json, ProfileItem::class.java)
     }
 
-//    fun decodeProfileConfig(guid: String): ProfileLiteItem? {
-//        if (guid.isBlank()) {
-//            return null
-//        }
-//        val json = profileStorage.decodeString(guid)
-//        if (json.isNullOrBlank()) {
-//            return null
-//        }
-//        return JsonUtil.fromJson(json, ProfileLiteItem::class.java)
-//    }
-
     fun encodeServerConfig(guid: String, config: ProfileItem): String {
         val key = guid.ifBlank { Utils.getUuid() }
         profileFullStorage.encode(key, JsonUtil.toJson(config))
@@ -96,14 +84,6 @@ object MmkvManager {
                 mainStorage.encode(KEY_SELECTED_SERVER, key)
             }
         }
-//        val profile = ProfileLiteItem(
-//            configType = config.configType,
-//            subscriptionId = config.subscriptionId,
-//            remarks = config.remarks,
-//            server = config.getProxyOutbound()?.getServerAddress(),
-//            serverPort = config.getProxyOutbound()?.getServerPort(),
-//        )
-//        profileStorage.encode(key, JsonUtil.toJson(profile))
         return key
     }
 
@@ -118,7 +98,6 @@ object MmkvManager {
         serverList.remove(guid)
         encodeServerList(serverList)
         profileFullStorage.remove(guid)
-        //profileStorage.remove(guid)
         serverAffStorage.remove(guid)
     }
 
@@ -168,7 +147,6 @@ object MmkvManager {
         val count = profileFullStorage.allKeys()?.count() ?: 0
         mainStorage.clearAll()
         profileFullStorage.clearAll()
-        //profileStorage.clearAll()
         serverAffStorage.clearAll()
         return count
     }
@@ -356,10 +334,6 @@ object MmkvManager {
     //endregion
 
     //region Others
-
-    fun encodeStartOnBoot(startOnBoot: Boolean) {
-        MmkvManager.encodeSettings(PREF_IS_BOOTED, startOnBoot)
-    }
 
     fun decodeStartOnBoot(): Boolean {
         return decodeSettingsBool(PREF_IS_BOOTED, false)
