@@ -56,8 +56,6 @@ object VlessFmt : FmtBase() {
             profileItem.host,
             profileItem.path,
             profileItem.seed,
-            profileItem.quicSecurity,
-            profileItem.quicKey,
             profileItem.mode,
             profileItem.serviceName,
             profileItem.authority,

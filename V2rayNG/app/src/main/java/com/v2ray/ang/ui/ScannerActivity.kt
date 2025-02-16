@@ -8,7 +8,6 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.activity.result.contract.ActivityResultContracts
-import com.tbruyelle.rxpermissions3.RxPermissions
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
 import com.v2ray.ang.extension.toast
@@ -67,20 +66,7 @@ class ScannerActivity : BaseActivity() {
         }
 
         R.id.select_photo -> {
-            val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                Manifest.permission.READ_MEDIA_IMAGES
-            } else {
-                Manifest.permission.READ_EXTERNAL_STORAGE
-            }
-            RxPermissions(this)
-                .request(permission)
-                .subscribe { granted ->
-                    if (granted) {
-                        showFileChooser()
-                    } else {
-                        toast(R.string.toast_permission_denied)
-                    }
-                }
+            showFileChooser()
             true
         }
 

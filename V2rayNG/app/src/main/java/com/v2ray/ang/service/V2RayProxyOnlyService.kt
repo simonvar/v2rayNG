@@ -11,6 +11,7 @@ import com.v2ray.ang.util.Utils
 import java.lang.ref.SoftReference
 
 class V2RayProxyOnlyService : Service(), ServiceControl {
+
     override fun onCreate() {
         super.onCreate()
         V2RayServiceManager.serviceControl = SoftReference(this)

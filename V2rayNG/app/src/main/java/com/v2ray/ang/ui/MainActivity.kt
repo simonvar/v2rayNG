@@ -27,7 +27,6 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.tabs.TabLayout
-import com.tbruyelle.rxpermissions3.RxPermissions
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.AppConfig.VPN
 import com.v2ray.ang.R
@@ -35,7 +34,6 @@ import com.v2ray.ang.databinding.ActivityMainBinding
 import com.v2ray.ang.dto.EConfigType
 import com.v2ray.ang.extension.toast
 import com.v2ray.ang.handler.AngConfigManager
-import com.v2ray.ang.handler.MigrateManager
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.helper.SimpleItemTouchHelperCallback
 import com.v2ray.ang.service.V2RayServiceManager
@@ -56,14 +54,16 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
     }
 
     private val adapter by lazy { MainRecyclerAdapter(this) }
-    private val requestVpnPermission = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        if (it.resultCode == RESULT_OK) {
-            startV2Ray()
+    private val requestVpnPermission =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            if (it.resultCode == RESULT_OK) {
+                startV2Ray()
+            }
         }
-    }
-    private val requestSubSettingActivity = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        initGroupTab()
-    }
+    private val requestSubSettingActivity =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            initGroupTab()
+        }
     private val tabGroupListener = object : TabLayout.OnTabSelectedListener {
         override fun onTabSelected(tab: TabLayout.Tab?) {
             val selectId = tab?.tag.toString()
@@ -118,7 +118,11 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         mItemTouchHelper?.attachToRecyclerView(binding.recyclerView)
 
         val toggle = ActionBarDrawerToggle(
-            this, binding.drawerLayout, binding.toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close
+            this,
+            binding.drawerLayout,
+            binding.toolbar,
+            R.string.navigation_drawer_open,
+            R.string.navigation_drawer_close
         )
         binding.drawerLayout.addDrawerListener(toggle)
         toggle.syncState()
@@ -126,23 +130,12 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
 
         initGroupTab()
         setupViewModel()
-        migrateLegacy()
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            RxPermissions(this)
-                .request(Manifest.permission.POST_NOTIFICATIONS)
-                .subscribe {
-                    if (!it)
-                        toast(R.string.toast_permission_denied_notification)
-                }
-        }
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
                     binding.drawerLayout.closeDrawer(GravityCompat.START)
                 } else {
-                    //super.onBackPressed()
                     onBackPressedDispatcher.onBackPressed()
                 }
             }
@@ -162,33 +155,20 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             adapter.isRunning = isRunning
             if (isRunning) {
                 binding.fab.setImageResource(R.drawable.ic_stop_24dp)
-                binding.fab.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.color_fab_active))
+                binding.fab.backgroundTintList =
+                    ColorStateList.valueOf(ContextCompat.getColor(this, R.color.color_fab_active))
                 setTestState(getString(R.string.connection_connected))
                 binding.layoutTest.isFocusable = true
             } else {
                 binding.fab.setImageResource(R.drawable.ic_play_24dp)
-                binding.fab.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.color_fab_inactive))
+                binding.fab.backgroundTintList =
+                    ColorStateList.valueOf(ContextCompat.getColor(this, R.color.color_fab_inactive))
                 setTestState(getString(R.string.connection_not_connected))
                 binding.layoutTest.isFocusable = false
             }
         }
         mainViewModel.startListenBroadcast()
         mainViewModel.initAssets(assets)
-    }
-
-    private fun migrateLegacy() {
-        lifecycleScope.launch(Dispatchers.IO) {
-            val result = MigrateManager.migrateServerConfig2Profile()
-            launch(Dispatchers.Main) {
-                if (result) {
-                    toast(getString(R.string.migration_success))
-                    mainViewModel.reloadServerList()
-                } else {
-                    //toast(getString(R.string.migration_fail))
-                }
-            }
-
-        }
     }
 
     private fun initGroupTab() {
@@ -358,13 +338,23 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         }
 
         R.id.ping_all -> {
-            toast(getString(R.string.connection_test_testing_count, mainViewModel.serversCache.count()))
+            toast(
+                getString(
+                    R.string.connection_test_testing_count,
+                    mainViewModel.serversCache.count()
+                )
+            )
             mainViewModel.testAllTcping()
             true
         }
 
         R.id.real_ping_all -> {
-            toast(getString(R.string.connection_test_testing_count, mainViewModel.serversCache.count()))
+            toast(
+                getString(
+                    R.string.connection_test_testing_count,
+                    mainViewModel.serversCache.count()
+                )
+            )
             mainViewModel.testAllRealPing()
             true
         }
@@ -462,37 +452,27 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
      * import config from qrcode
      */
     private fun importQRcode(forConfig: Boolean): Boolean {
-//        try {
-//            startActivityForResult(Intent("com.google.zxing.client.android.SCAN")
-//                    .addCategory(Intent.CATEGORY_DEFAULT)
-//                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP), requestCode)
-//        } catch (e: Exception) {
-        RxPermissions(this)
-            .request(Manifest.permission.CAMERA)
-            .subscribe {
-                if (it)
-                    if (forConfig)
-                        scanQRCodeForConfig.launch(Intent(this, ScannerActivity::class.java))
-                    else
-                        scanQRCodeForUrlToCustomConfig.launch(Intent(this, ScannerActivity::class.java))
-                else
-                    toast(R.string.toast_permission_denied)
-            }
-//        }
+        if (forConfig)
+            scanQRCodeForConfig.launch(Intent(this, ScannerActivity::class.java))
+        else
+            scanQRCodeForUrlToCustomConfig.launch(Intent(this, ScannerActivity::class.java))
+
         return true
     }
 
-    private val scanQRCodeForConfig = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        if (it.resultCode == RESULT_OK) {
-            importBatchConfig(it.data?.getStringExtra("SCAN_RESULT"))
+    private val scanQRCodeForConfig =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            if (it.resultCode == RESULT_OK) {
+                importBatchConfig(it.data?.getStringExtra("SCAN_RESULT"))
+            }
         }
-    }
 
-    private val scanQRCodeForUrlToCustomConfig = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        if (it.resultCode == RESULT_OK) {
-            importConfigCustomUrl(it.data?.getStringExtra("SCAN_RESULT"))
+    private val scanQRCodeForUrlToCustomConfig =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            if (it.resultCode == RESULT_OK) {
+                importConfigCustomUrl(it.data?.getStringExtra("SCAN_RESULT"))
+            }
         }
-    }
 
     /**
      * import config from clipboard
@@ -514,7 +494,11 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
 
         lifecycleScope.launch(Dispatchers.IO) {
             try {
-                val (count, countSub) = AngConfigManager.importBatchConfig(server, mainViewModel.subscriptionId, true)
+                val (count, countSub) = AngConfigManager.importBatchConfig(
+                    server,
+                    mainViewModel.subscriptionId,
+                    true
+                )
                 delay(500L)
                 withContext(Dispatchers.Main) {
                     when {
@@ -646,42 +630,36 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         intent.addCategory(Intent.CATEGORY_OPENABLE)
 
         try {
-            chooseFileForCustomConfig.launch(Intent.createChooser(intent, getString(R.string.title_file_chooser)))
+            chooseFileForCustomConfig.launch(
+                Intent.createChooser(
+                    intent,
+                    getString(R.string.title_file_chooser)
+                )
+            )
         } catch (ex: ActivityNotFoundException) {
             toast(R.string.toast_require_file_manager)
         }
     }
 
-    private val chooseFileForCustomConfig = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        val uri = it.data?.data
-        if (it.resultCode == RESULT_OK && uri != null) {
-            readContentFromUri(uri)
+    private val chooseFileForCustomConfig =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            val uri = it.data?.data
+            if (it.resultCode == RESULT_OK && uri != null) {
+                readContentFromUri(uri)
+            }
         }
-    }
 
     /**
      * read content from uri
      */
     private fun readContentFromUri(uri: Uri) {
-        val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            Manifest.permission.READ_MEDIA_IMAGES
-        } else {
-            Manifest.permission.READ_EXTERNAL_STORAGE
-        }
-        RxPermissions(this)
-            .request(permission)
-            .subscribe {
-                if (it) {
-                    try {
-                        contentResolver.openInputStream(uri).use { input ->
-                            importCustomizeConfig(input?.bufferedReader()?.readText())
-                        }
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
-                } else
-                    toast(R.string.toast_permission_denied)
+        try {
+            contentResolver.openInputStream(uri).use { input ->
+                importCustomizeConfig(input?.bufferedReader()?.readText())
             }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     /**
@@ -701,7 +679,11 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             }
             //adapter.notifyItemInserted(mainViewModel.serverList.lastIndex)
         } catch (e: Exception) {
-            ToastCompat.makeText(this, "${getString(R.string.toast_malformed_josn)} ${e.cause?.message}", Toast.LENGTH_LONG).show()
+            ToastCompat.makeText(
+                this,
+                "${getString(R.string.toast_malformed_josn)} ${e.cause?.message}",
+                Toast.LENGTH_LONG
+            ).show()
             e.printStackTrace()
             return
         }
@@ -710,15 +692,6 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
     private fun setTestState(content: String?) {
         binding.tvTestState.text = content
     }
-
-//    val mConnection = object : ServiceConnection {
-//        override fun onServiceDisconnected(name: ComponentName?) {
-//        }
-//
-//        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-//            sendMsg(AppConfig.MSG_REGISTER_CLIENT, "")
-//        }
-//    }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
         if (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_BUTTON_B) {
@@ -749,7 +722,10 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
 
 
             R.id.promotion -> {
-                Utils.openUri(this, "${Utils.decode(AppConfig.PromotionUrl)}?t=${System.currentTimeMillis()}")
+                Utils.openUri(
+                    this,
+                    "${Utils.decode(AppConfig.PromotionUrl)}?t=${System.currentTimeMillis()}"
+                )
             }
 
             R.id.logcat -> {

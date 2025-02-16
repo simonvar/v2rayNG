@@ -28,21 +28,9 @@ class AngApplication : MultiDexApplication() {
 
     override fun onCreate() {
         super.onCreate()
-
-//        LeakCanary.install(this)
-
-//        val defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
-//        firstRun = defaultSharedPreferences.getInt(PREF_LAST_VERSION, 0) != BuildConfig.VERSION_CODE
-//        if (firstRun)
-//            defaultSharedPreferences.edit().putInt(PREF_LAST_VERSION, BuildConfig.VERSION_CODE).apply()
-
         MMKV.initialize(this)
-
         Utils.setNightMode()
-        // Initialize WorkManager with the custom configuration
         WorkManager.initialize(this, workManagerConfiguration)
-
         SettingsManager.initRoutingRulesets(this)
     }
-
 }

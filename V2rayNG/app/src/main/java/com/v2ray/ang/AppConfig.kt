@@ -69,13 +69,6 @@ object AppConfig {
     const val BROADCAST_ACTION_ACTIVITY = "com.v2ray.ang.action.activity"
     const val BROADCAST_ACTION_WIDGET_CLICK = "com.v2ray.ang.action.widget.click"
 
-    /** Tasker extras. */
-    const val TASKER_EXTRA_BUNDLE = "com.twofortyfouram.locale.intent.extra.BUNDLE"
-    const val TASKER_EXTRA_STRING_BLURB = "com.twofortyfouram.locale.intent.extra.BLURB"
-    const val TASKER_EXTRA_BUNDLE_SWITCH = "tasker_extra_bundle_switch"
-    const val TASKER_EXTRA_BUNDLE_GUID = "tasker_extra_bundle_guid"
-    const val TASKER_DEFAULT_GUID = "Default"
-
     /** Tags for different proxy modes. */
     const val TAG_PROXY = "proxy"
     const val TAG_DIRECT = "direct"
@@ -89,8 +82,7 @@ object AppConfig {
     /** URLs for various resources. */
     const val androidpackagenamelistUrl =
         "https://raw.githubusercontent.com/2dust/androidpackagenamelist/master/proxy.txt"
-    const val v2rayCustomRoutingListUrl =
-        "https://raw.githubusercontent.com/2dust/v2rayCustomRoutingList/master/"
+
     const val v2rayNGUrl = "https://github.com/2dust/v2rayNG"
     const val v2rayNGIssues = "$v2rayNGUrl/issues"
     const val v2rayNGWikiMode = "$v2rayNGUrl/wiki/Mode"
@@ -150,7 +142,6 @@ object AppConfig {
     const val VLESS = "vless://"
     const val TROJAN = "trojan://"
     const val WIREGUARD = "wireguard://"
-    const val TUIC = "tuic://"
     const val HYSTERIA2 = "hysteria2://"
     const val HY2 = "hy2://"
 

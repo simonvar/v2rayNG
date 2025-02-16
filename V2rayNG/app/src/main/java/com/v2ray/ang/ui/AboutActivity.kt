@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.FileProvider
-import com.tbruyelle.rxpermissions3.RxPermissions
 import com.tencent.mmkv.MMKV
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.BuildConfig
@@ -20,7 +19,6 @@ import com.v2ray.ang.util.ZipUtil
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Locale
-
 
 class AboutActivity : BaseActivity() {
     private val binding by lazy { ActivityAboutBinding.inflate(layoutInflater) }
@@ -62,23 +60,7 @@ class AboutActivity : BaseActivity() {
         }
 
         binding.layoutRestore.setOnClickListener {
-            val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                Manifest.permission.READ_MEDIA_IMAGES
-            } else {
-                Manifest.permission.READ_EXTERNAL_STORAGE
-            }
-            RxPermissions(this)
-                .request(permission)
-                .subscribe {
-                    if (it) {
-                        try {
-                            showFileChooser()
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                        }
-                    } else
-                        toast(R.string.toast_permission_denied)
-                }
+            showFileChooser()
         }
 
         binding.layoutSoureCcode.setOnClickListener {

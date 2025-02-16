@@ -11,7 +11,6 @@ import com.v2ray.ang.extension.serializable
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.handler.V2rayConfigManager
 import com.v2ray.ang.util.MessageUtil
-import com.v2ray.ang.util.PluginUtil
 import com.v2ray.ang.util.SpeedtestUtil
 import com.v2ray.ang.util.Utils
 import go.Seq
@@ -24,7 +23,13 @@ import libv2ray.Libv2ray
 import java.util.concurrent.Executors
 
 class V2RayTestService : Service() {
-    private val realTestScope by lazy { CoroutineScope(Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()).asCoroutineDispatcher()) }
+    private val realTestScope by lazy {
+        CoroutineScope(
+            Executors.newFixedThreadPool(
+                Runtime.getRuntime().availableProcessors()
+            ).asCoroutineDispatcher()
+        )
+    }
 
     override fun onCreate() {
         super.onCreate()
@@ -38,7 +43,11 @@ class V2RayTestService : Service() {
                 val guid = intent.serializable<String>("content") ?: ""
                 realTestScope.launch {
                     val result = startRealPing(guid)
-                    MessageUtil.sendMsg2UI(this@V2RayTestService, MSG_MEASURE_CONFIG_SUCCESS, Pair(guid, result))
+                    MessageUtil.sendMsg2UI(
+                        this@V2RayTestService,
+                        MSG_MEASURE_CONFIG_SUCCESS,
+                        Pair(guid, result)
+                    )
                 }
             }
 
@@ -55,17 +64,10 @@ class V2RayTestService : Service() {
 
     private fun startRealPing(guid: String): Long {
         val retFailure = -1L
-
-        val config = MmkvManager.decodeServerConfig(guid) ?: return retFailure
-        if (config.configType == EConfigType.HYSTERIA2) {
-            val delay = PluginUtil.realPingHy2(this, config)
-            return delay
-        } else {
-            val config = V2rayConfigManager.getV2rayConfig(this, guid)
-            if (!config.status) {
-                return retFailure
-            }
-            return SpeedtestUtil.realPing(config.content)
+        val config = V2rayConfigManager.getV2rayConfig(this, guid)
+        if (!config.status) {
+            return retFailure
         }
+        return SpeedtestUtil.realPing(config.content)
     }
 }

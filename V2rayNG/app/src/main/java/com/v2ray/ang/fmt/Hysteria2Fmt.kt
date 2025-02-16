@@ -118,10 +118,8 @@ object Hysteria2Fmt : FmtBase() {
         return bean
     }
 
-
     fun toOutbound(profileItem: ProfileItem): OutboundBean? {
         val outboundBean = OutboundBean.create(EConfigType.HYSTERIA2)
         return outboundBean
     }
-
 }

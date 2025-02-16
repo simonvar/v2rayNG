@@ -34,10 +34,10 @@ import kotlinx.coroutines.launch
 import java.util.Collections
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
+
     private var serverList = MmkvManager.decodeServerList()
     var subscriptionId: String = MmkvManager.decodeSettingsString(AppConfig.CACHE_SUBSCRIPTION_ID, "").orEmpty()
 
-    //var keywordFilter: String = MmkvManager.MmkvManager.decodeSettingsString(AppConfig.CACHE_KEYWORD_FILTER, "")?:""
     var keywordFilter = ""
     val serversCache = mutableListOf<ServersCache>()
     val isRunning by lazy { MutableLiveData<Boolean>() }
@@ -91,13 +91,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 val key = MmkvManager.encodeServerConfig("", config)
                 MmkvManager.encodeServerRaw(key, server)
                 serverList.add(0, key)
-//                val profile = ProfileLiteItem(
-//                    configType = config.configType,
-//                    subscriptionId = config.subscriptionId,
-//                    remarks = config.remarks,
-//                    server = config.getProxyOutbound()?.getServerAddress(),
-//                    serverPort = config.getProxyOutbound()?.getServerPort(),
-//                )
                 serversCache.add(0, ServersCache(key, config))
                 return true
             } catch (e: Exception) {
@@ -124,18 +117,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         serversCache.clear()
         for (guid in serverList) {
             var profile = MmkvManager.decodeServerConfig(guid) ?: continue
-//            var profile = MmkvManager.decodeProfileConfig(guid)
-//            if (profile == null) {
-//                val config = MmkvManager.decodeServerConfig(guid) ?: continue
-//                profile = ProfileLiteItem(
-//                    configType = config.configType,
-//                    subscriptionId = config.subscriptionId,
-//                    remarks = config.remarks,
-//                    server = config.getProxyOutbound()?.getServerAddress(),
-//                    serverPort = config.getProxyOutbound()?.getServerPort(),
-//                )
-//                MmkvManager.encodeServerConfig(guid, config)
-//            }
 
             if (subscriptionId.isNotEmpty() && subscriptionId != profile.subscriptionId) {
                 continue

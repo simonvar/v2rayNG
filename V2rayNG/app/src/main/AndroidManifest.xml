@@ -220,26 +220,7 @@
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
                 android:value="tile" />
         </service>
-        <!-- =====================Tasker===================== -->
-        <activity
-            android:name=".ui.TaskerActivity"
-            android:exported="true"
-            android:icon="@mipmap/ic_launcher">
-            <intent-filter>
-                <action android:name="com.twofortyfouram.locale.intent.action.EDIT_SETTING" />
-            </intent-filter>
-        </activity>
 
-        <receiver
-            android:name=".receiver.TaskerReceiver"
-            android:exported="true"
-            android:process=":RunSoLibV2RayDaemon"
-            tools:ignore="ExportedReceiver">
-            <intent-filter>
-                <action android:name="com.twofortyfouram.locale.intent.action.FIRE_SETTING" />
-            </intent-filter>
-        </receiver>
-        <!-- =====================Tasker===================== -->
         <provider
             android:name="androidx.startup.InitializationProvider"
             android:authorities="${applicationId}.androidx-startup"

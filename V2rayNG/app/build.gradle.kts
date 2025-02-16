@@ -159,7 +159,6 @@ dependencies {
     // Reactive and Utility Libraries
     implementation(libs.rxjava)
     implementation(libs.rxandroid)
-    implementation(libs.rxpermissions)
 
     // Language and Processing Libraries
     implementation(libs.language.base)

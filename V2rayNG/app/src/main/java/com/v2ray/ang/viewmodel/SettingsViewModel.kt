@@ -78,9 +78,6 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                 MmkvManager.encodeSettings(key, sharedPreferences.getString(key, "8"))
             }
 
-//            AppConfig.PREF_PER_APP_PROXY_SET -> {
-//                MmkvManager.encodeSettings(key, sharedPreferences.getStringSet(key, setOf()))
-//            }
         }
         if (key == AppConfig.PREF_UI_MODE_NIGHT) {
             Utils.setNightMode()

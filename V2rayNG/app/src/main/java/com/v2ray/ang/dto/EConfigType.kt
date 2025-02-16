@@ -2,7 +2,6 @@ package com.v2ray.ang.dto
 
 import com.v2ray.ang.AppConfig
 
-
 enum class EConfigType(val value: Int, val protocolScheme: String) {
     VMESS(1, AppConfig.VMESS),
     CUSTOM(2, AppConfig.CUSTOM),
@@ -11,7 +10,6 @@ enum class EConfigType(val value: Int, val protocolScheme: String) {
     VLESS(5, AppConfig.VLESS),
     TROJAN(6, AppConfig.TROJAN),
     WIREGUARD(7, AppConfig.WIREGUARD),
-//    TUIC(8, AppConfig.TUIC),
     HYSTERIA2(9, AppConfig.HYSTERIA2),
     HTTP(10, AppConfig.HTTP);
 

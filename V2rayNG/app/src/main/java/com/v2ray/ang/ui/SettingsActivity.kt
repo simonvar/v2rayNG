@@ -18,7 +18,6 @@ import com.v2ray.ang.AppConfig.VPN
 import com.v2ray.ang.R
 import com.v2ray.ang.extension.toLongEx
 import com.v2ray.ang.handler.MmkvManager
-import com.v2ray.ang.service.SubscriptionUpdater
 import com.v2ray.ang.util.Utils
 import com.v2ray.ang.viewmodel.SettingsViewModel
 import java.util.concurrent.TimeUnit
@@ -115,26 +114,6 @@ class SettingsActivity : BaseActivity() {
             }
             fragmentInterval?.setOnPreferenceChangeListener { _, newValue ->
                 updateFragmentInterval(newValue as String)
-                true
-            }
-
-            autoUpdateCheck?.setOnPreferenceChangeListener { _, newValue ->
-                val value = newValue as Boolean
-                autoUpdateCheck?.isChecked = value
-                autoUpdateInterval?.isEnabled = value
-                autoUpdateInterval?.text?.toLongEx()?.let {
-                    if (newValue) configureUpdateTask(it) else cancelUpdateTask()
-                }
-                true
-            }
-            autoUpdateInterval?.setOnPreferenceChangeListener { _, any ->
-                var nval = any as String
-
-                // It must be greater than 15 minutes because WorkManager couldn't run tasks under 15 minutes intervals
-                nval =
-                    if (TextUtils.isEmpty(nval) || nval.toLongEx() < 15) AppConfig.SUBSCRIPTION_DEFAULT_UPDATE_INTERVAL else nval
-                autoUpdateInterval?.summary = nval
-                configureUpdateTask(nval.toLongEx())
                 true
             }
 
@@ -287,24 +266,6 @@ class SettingsActivity : BaseActivity() {
             fakeDns?.isEnabled = enabled
             localDnsPort?.isEnabled = enabled
             vpnDns?.isEnabled = !enabled
-        }
-
-        private fun configureUpdateTask(interval: Long) {
-            val rw = RemoteWorkManager.getInstance(AngApplication.application)
-            rw.cancelUniqueWork(AppConfig.SUBSCRIPTION_UPDATE_TASK_NAME)
-            rw.enqueueUniquePeriodicWork(
-                AppConfig.SUBSCRIPTION_UPDATE_TASK_NAME,
-                ExistingPeriodicWorkPolicy.UPDATE,
-                PeriodicWorkRequest.Builder(
-                    SubscriptionUpdater.UpdateTask::class.java,
-                    interval,
-                    TimeUnit.MINUTES
-                )
-                    .apply {
-                        setInitialDelay(interval, TimeUnit.MINUTES)
-                    }
-                    .build()
-            )
         }
 
         private fun cancelUpdateTask() {

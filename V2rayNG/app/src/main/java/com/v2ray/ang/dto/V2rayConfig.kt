@@ -350,8 +350,6 @@ data class V2rayConfig(
                 host: String?,
                 path: String?,
                 seed: String?,
-                quicSecurity: String?,
-                key: String?,
                 mode: String?,
                 serviceName: String?,
                 authority: String?
@@ -420,14 +418,6 @@ data class V2rayConfig(
                         h2Setting.path = path ?: "/"
                         httpSettings = h2Setting
                     }
-
-//                    "quic" -> {
-//                        val quicsetting = QuicSettingBean()
-//                        quicsetting.security = quicSecurity ?: "none"
-//                        quicsetting.key = key.orEmpty()
-//                        quicsetting.header.type = headerType ?: "none"
-//                        quicSettings = quicsetting
-//                    }
 
                     NetworkType.GRPC.type -> {
                         val grpcSetting = GrpcSettingsBean()
@@ -613,15 +603,6 @@ data class V2rayConfig(
                             h2Setting.path
                         )
                     }
-
-//                    "quic" -> {
-//                        val quicSetting = streamSettings?.quicSettings ?: return null
-//                        listOf(
-//                            quicSetting.header.type,
-//                            quicSetting.security,
-//                            quicSetting.key
-//                        )
-//                    }
 
                     NetworkType.GRPC.type -> {
                         val grpcSetting = streamSettings?.grpcSettings ?: return null

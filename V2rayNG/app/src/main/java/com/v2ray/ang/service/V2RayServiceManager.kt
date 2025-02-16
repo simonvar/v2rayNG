@@ -28,7 +28,6 @@ import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.handler.V2rayConfigManager
 import com.v2ray.ang.ui.MainActivity
 import com.v2ray.ang.util.MessageUtil
-import com.v2ray.ang.util.PluginUtil
 import com.v2ray.ang.util.Utils
 import go.Seq
 import io.reactivex.rxjava3.core.Observable
@@ -43,6 +42,7 @@ import java.lang.ref.SoftReference
 import kotlin.math.min
 
 object V2RayServiceManager {
+
     private const val NOTIFICATION_ID = 1
     private const val NOTIFICATION_PENDING_INTENT_CONTENT = 0
     private const val NOTIFICATION_PENDING_INTENT_STOP_V2RAY = 1
@@ -58,6 +58,7 @@ object V2RayServiceManager {
             Seq.setContext(value?.get()?.getService()?.applicationContext)
             Libv2ray.initV2Env(Utils.userAssetPath(value?.get()?.getService()), Utils.getDeviceIdForXUDPBaseKey())
         }
+
     var currentConfig: ProfileItem? = null
 
     private var lastQueryTime = 0L
@@ -73,8 +74,6 @@ object V2RayServiceManager {
             && !Utils.isValidUrl(config.server)
             && !Utils.isIpAddress(config.server)
         ) return
-//        val result = V2rayConfigUtil.getV2rayConfig(context, guid)
-//        if (!result.status) return
 
         if (MmkvManager.decodeSettingsBool(AppConfig.PREF_PROXY_SHARING) == true) {
             context.toast(R.string.toast_warning_pref_proxysharing_short)
@@ -172,8 +171,6 @@ object V2RayServiceManager {
         if (v2rayPoint.isRunning) {
             MessageUtil.sendMsg2UI(service, AppConfig.MSG_STATE_START_SUCCESS, "")
             showNotification()
-
-            PluginUtil.runPlugin(service, config, result.domainPort)
         } else {
             MessageUtil.sendMsg2UI(service, AppConfig.MSG_STATE_START_FAILURE, "")
             cancelNotification()
@@ -201,7 +198,6 @@ object V2RayServiceManager {
         } catch (e: Exception) {
             Log.d(ANG_PACKAGE, e.toString())
         }
-        PluginUtil.stopPlugin()
     }
 
     private class ReceiveMessageHandler : BroadcastReceiver() {

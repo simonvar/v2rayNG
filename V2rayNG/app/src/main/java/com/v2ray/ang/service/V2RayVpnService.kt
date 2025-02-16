@@ -33,6 +33,7 @@ import java.io.File
 import java.lang.ref.SoftReference
 
 class V2RayVpnService : VpnService(), ServiceControl {
+
     companion object {
         private const val VPN_MTU = 1500
         private const val PRIVATE_VLAN4_CLIENT = "10.10.10.1"
@@ -41,7 +42,6 @@ class V2RayVpnService : VpnService(), ServiceControl {
         private const val PRIVATE_VLAN6_ROUTER = "fc00::10:10:10:2"
         private const val TUN2SOCKS = "libtun2socks.so"
     }
-
 
     private lateinit var mInterface: ParcelFileDescriptor
     private var isRunning = false
@@ -98,11 +98,6 @@ class V2RayVpnService : VpnService(), ServiceControl {
         stopV2Ray()
     }
 
-//    override fun onLowMemory() {
-//        stopV2Ray()
-//        super.onLowMemory()
-//    }
-
     override fun onDestroy() {
         super.onDestroy()
         V2RayServiceManager.cancelNotification()
@@ -117,11 +112,8 @@ class V2RayVpnService : VpnService(), ServiceControl {
         // If the old interface has exactly the same parameters, use it!
         // Configure a builder while parsing the parameters.
         val builder = Builder()
-        //val enableLocalDns = defaultDPreference.getPrefBoolean(AppConfig.PREF_LOCAL_DNS_ENABLED, false)
-
         builder.setMtu(VPN_MTU)
         builder.addAddress(PRIVATE_VLAN4_CLIENT, 30)
-        //builder.addDnsServer(PRIVATE_VLAN4_ROUTER)
         val bypassLan = SettingsManager.routingRulesetsBypassLan()
         if (bypassLan) {
             resources.getStringArray(R.array.bypass_private_ip_address).forEach {
@@ -141,16 +133,13 @@ class V2RayVpnService : VpnService(), ServiceControl {
             }
         }
 
-//        if (MmkvManager.decodeSettingsBool(AppConfig.PREF_LOCAL_DNS_ENABLED) == true) {
-//            builder.addDnsServer(PRIVATE_VLAN4_ROUTER)
-//        } else {
+
         Utils.getVpnDnsServers()
             .forEach {
                 if (Utils.isPureIpAddress(it)) {
                     builder.addDnsServer(it)
                 }
             }
-//        }
 
         builder.setSession(V2RayServiceManager.currentConfig?.remarks.orEmpty())
 
@@ -282,14 +271,9 @@ class V2RayVpnService : VpnService(), ServiceControl {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         V2RayServiceManager.startV2rayPoint()
         return START_STICKY
-        //return super.onStartCommand(intent, flags, startId)
     }
 
     private fun stopV2Ray(isForced: Boolean = true) {
-//        val configName = defaultDPreference.getPrefString(PREF_CURR_CONFIG_GUID, "")
-//        val emptyInfo = VpnNetworkInfo()
-//        val info = loadVpnNetworkInfo(configName, emptyInfo)!! + (lastNetworkInfo ?: emptyInfo)
-//        saveVpnNetworkInfo(configName, info)
         isRunning = false
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             try {
