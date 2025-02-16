@@ -50,6 +50,7 @@ object V2RayServiceManager {
 
     val v2rayPoint: V2RayPoint =
         Libv2ray.newV2RayPoint(V2RayCallback(), Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1)
+
     private val mMsgReceive = ReceiveMessageHandler()
 
     var serviceControl: SoftReference<ServiceControl>? = null

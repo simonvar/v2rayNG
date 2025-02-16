@@ -281,16 +281,6 @@ object Utils {
         }
     }
 
-    fun urlEncode(url: String): String {
-        return try {
-            URLEncoder.encode(url, Charsets.UTF_8.toString()).replace("+", "%20")
-        } catch (e: Exception) {
-            e.printStackTrace()
-            url
-        }
-    }
-
-
     /**
      * readTextFromAssets
      */
@@ -309,14 +299,6 @@ object Utils {
             return ""
         val extDir = context.getExternalFilesDir(AppConfig.DIR_ASSETS)
             ?: return context.getDir(AppConfig.DIR_ASSETS, 0).absolutePath
-        return extDir.absolutePath
-    }
-
-    fun backupPath(context: Context?): String {
-        if (context == null)
-            return ""
-        val extDir = context.getExternalFilesDir(AppConfig.DIR_BACKUPS)
-            ?: return context.getDir(AppConfig.DIR_BACKUPS, 0).absolutePath
         return extDir.absolutePath
     }
 
@@ -346,43 +328,9 @@ object Utils {
         return result
     }
 
-    @Throws(IOException::class)
-    fun getUrlContentWithCustomUserAgent(
-        urlStr: String?,
-        timeout: Int = 30000,
-        httpPort: Int = 0
-    ): String {
-        val url = URL(urlStr)
-        val conn = if (httpPort == 0) {
-            url.openConnection()
-        } else {
-            url.openConnection(
-                Proxy(
-                    Proxy.Type.HTTP,
-                    InetSocketAddress(LOOPBACK, httpPort)
-                )
-            )
-        }
-        conn.connectTimeout = timeout
-        conn.readTimeout = timeout
-        conn.setRequestProperty("Connection", "close")
-        conn.setRequestProperty("User-agent", "v2rayNG/${BuildConfig.VERSION_NAME}")
-        url.userInfo?.let {
-            conn.setRequestProperty(
-                "Authorization",
-                "Basic ${encode(urlDecode(it))}"
-            )
-        }
-        conn.useCaches = false
-        return conn.inputStream.use {
-            it.bufferedReader().readText()
-        }
-    }
-
     fun getDarkModeStatus(context: Context): Boolean {
         return context.resources.configuration.uiMode and UI_MODE_NIGHT_MASK != UI_MODE_NIGHT_NO
     }
-
 
     fun setNightMode() {
         when (MmkvManager.decodeSettingsString(AppConfig.PREF_UI_MODE_NIGHT, "0")) {
@@ -421,7 +369,6 @@ object Utils {
         }
     }
 
-
     private fun getSysLocale(): Locale = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
         LocaleList.getDefault()[0]
     } else {
@@ -434,16 +381,6 @@ object Utils {
             .replace("|", "%7C")
     }
 
-    fun removeWhiteSpace(str: String?): String? {
-        return str?.replace(" ", "")
-    }
-
-    fun idnToASCII(str: String): String {
-        val url = URL(str)
-        return URL(url.protocol, IDN.toASCII(url.host, IDN.ALLOW_UNASSIGNED), url.port, url.file)
-            .toExternalForm()
-    }
-
     fun getDelayTestUrl(second: Boolean = false): String {
         return if (second) {
             AppConfig.DelayTestUrl2
@@ -453,30 +390,6 @@ object Utils {
         }
     }
 
-    fun findFreePort(ports: List<Int>): Int {
-        for (port in ports) {
-            try {
-                return ServerSocket(port).use { it.localPort }
-            } catch (ex: IOException) {
-                continue  // try next port
-            }
-        }
-
-        // if the program gets here, no port in the range was found
-        throw IOException("no free port found")
-    }
-
-    fun isValidSubUrl(value: String?): Boolean {
-        try {
-            if (value.isNullOrEmpty()) return false
-            if (URLUtil.isHttpsUrl(value)) return true
-            if (URLUtil.isHttpUrl(value) && value.contains(LOOPBACK)) return true
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        return false
-    }
-
     fun receiverFlags(): Int = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         ContextCompat.RECEIVER_EXPORTED
     } else {
@@ -484,6 +397,5 @@ object Utils {
     }
 
     fun isXray(): Boolean = (ANG_PACKAGE.startsWith("com.v2ray.ang"))
-
 }
 

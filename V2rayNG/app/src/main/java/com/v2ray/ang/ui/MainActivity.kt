@@ -14,7 +14,6 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.navigation.NavigationView
 import com.v2ray.ang.AppConfig
@@ -24,7 +23,6 @@ import com.v2ray.ang.databinding.ActivityMainBinding
 import com.v2ray.ang.extension.toast
 import com.v2ray.ang.handler.AngConfigManager
 import com.v2ray.ang.handler.MmkvManager
-import com.v2ray.ang.helper.SimpleItemTouchHelperCallback
 import com.v2ray.ang.service.V2RayServiceManager
 import com.v2ray.ang.util.Utils
 import com.v2ray.ang.viewmodel.MainViewModel
@@ -46,7 +44,6 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             }
         }
 
-    private var mItemTouchHelper: ItemTouchHelper? = null
     val mainViewModel: MainViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -73,9 +70,6 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         binding.recyclerView.setHasFixedSize(true)
         binding.recyclerView.layoutManager = LinearLayoutManager(this)
         binding.recyclerView.adapter = adapter
-
-        mItemTouchHelper = ItemTouchHelper(SimpleItemTouchHelperCallback(adapter))
-        mItemTouchHelper?.attachToRecyclerView(binding.recyclerView)
 
         val toggle =
             ActionBarDrawerToggle(
@@ -178,8 +172,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
 
         lifecycleScope.launch(Dispatchers.IO) {
             try {
-                val count =
-                    AngConfigManager.importBatchConfig(server, mainViewModel.subscriptionId, true)
+                val count = AngConfigManager.importBatchConfig(server)
                 delay(500L)
                 withContext(Dispatchers.Main) {
                     when {

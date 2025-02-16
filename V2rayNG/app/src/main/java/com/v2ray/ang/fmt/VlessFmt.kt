@@ -31,14 +31,6 @@ object VlessFmt : FmtBase() {
         return config
     }
 
-    fun toUri(config: ProfileItem): String {
-        val dicQuery = getQueryDic(config)
-        dicQuery["encryption"] = config.method ?: "none"
-
-        return toUri(config, config.password, dicQuery)
-    }
-
-
     fun toOutbound(profileItem: ProfileItem): OutboundBean? {
         val outboundBean = OutboundBean.create(EConfigType.VLESS)
 

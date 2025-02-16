@@ -15,40 +15,37 @@ import com.v2ray.ang.AngApplication
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.AppConfig.ANG_PACKAGE
 import com.v2ray.ang.R
-import com.v2ray.ang.dto.ProfileItem
 import com.v2ray.ang.dto.ServersCache
-import com.v2ray.ang.extension.serializable
 import com.v2ray.ang.extension.toast
-import com.v2ray.ang.handler.AngConfigManager
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.handler.SettingsManager
 import com.v2ray.ang.util.MessageUtil
 import com.v2ray.ang.util.Utils
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
-import java.util.Collections
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private var serverList = MmkvManager.decodeServerList()
-    var subscriptionId: String = MmkvManager.decodeSettingsString(AppConfig.CACHE_SUBSCRIPTION_ID, "").orEmpty()
 
     val serversCache = mutableListOf<ServersCache>()
     val isRunning by lazy { MutableLiveData<Boolean>() }
     val updateListAction by lazy { MutableLiveData<Int>() }
 
     /**
-     * Refer to the official documentation for [registerReceiver](https://developer.android.com/reference/androidx/core/content/ContextCompat#registerReceiver(android.content.Context,android.content.BroadcastReceiver,android.content.IntentFilter,int):
+     * Refer to the official documentation for
+     * [registerReceiver](https://developer.android.com/reference/androidx/core/content/ContextCompat#registerReceiver(android.content.Context,android.content.BroadcastReceiver,android.content.IntentFilter,int):
      * `registerReceiver(Context, BroadcastReceiver, IntentFilter, int)`.
      */
-
     fun startListenBroadcast() {
         isRunning.value = false
         val mFilter = IntentFilter(AppConfig.BROADCAST_ACTION_ACTIVITY)
-        ContextCompat.registerReceiver(getApplication(), mMsgReceiver, mFilter, Utils.receiverFlags())
+        ContextCompat.registerReceiver(
+            getApplication(),
+            mMsgReceiver,
+            mFilter,
+            Utils.receiverFlags(),
+        )
         MessageUtil.sendMsg2Service(getApplication(), AppConfig.MSG_REGISTER_CLIENT, "")
     }
 
@@ -73,18 +70,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun swapServer(fromPosition: Int, toPosition: Int) {
-        if (subscriptionId.isEmpty()) {
-            Collections.swap(serverList, fromPosition, toPosition)
-        } else {
-            val fromPosition2 = serverList.indexOf(serversCache[fromPosition].guid)
-            val toPosition2 = serverList.indexOf(serversCache[toPosition].guid)
-            Collections.swap(serverList, fromPosition2, toPosition2)
-        }
-        Collections.swap(serversCache, fromPosition, toPosition)
-        MmkvManager.encodeServerList(serverList)
-    }
-
     @Synchronized
     fun updateCache() {
         serversCache.clear()
@@ -95,10 +80,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun getPosition(guid: String): Int {
-        serversCache.forEachIndexed { index, it ->
-            if (it.guid == guid)
-                return index
-        }
+        serversCache.forEachIndexed { index, it -> if (it.guid == guid) return index }
         return -1
     }
 
@@ -108,31 +90,32 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    private val mMsgReceiver = object : BroadcastReceiver() {
-        override fun onReceive(ctx: Context?, intent: Intent?) {
-            when (intent?.getIntExtra("key", 0)) {
-                AppConfig.MSG_STATE_RUNNING -> {
-                    isRunning.value = true
-                }
+    private val mMsgReceiver =
+        object : BroadcastReceiver() {
+            override fun onReceive(ctx: Context?, intent: Intent?) {
+                when (intent?.getIntExtra("key", 0)) {
+                    AppConfig.MSG_STATE_RUNNING -> {
+                        isRunning.value = true
+                    }
 
-                AppConfig.MSG_STATE_NOT_RUNNING -> {
-                    isRunning.value = false
-                }
+                    AppConfig.MSG_STATE_NOT_RUNNING -> {
+                        isRunning.value = false
+                    }
 
-                AppConfig.MSG_STATE_START_SUCCESS -> {
-                    getApplication<AngApplication>().toast(R.string.toast_services_success)
-                    isRunning.value = true
-                }
+                    AppConfig.MSG_STATE_START_SUCCESS -> {
+                        getApplication<AngApplication>().toast(R.string.toast_services_success)
+                        isRunning.value = true
+                    }
 
-                AppConfig.MSG_STATE_START_FAILURE -> {
-                    getApplication<AngApplication>().toast(R.string.toast_services_failure)
-                    isRunning.value = false
-                }
+                    AppConfig.MSG_STATE_START_FAILURE -> {
+                        getApplication<AngApplication>().toast(R.string.toast_services_failure)
+                        isRunning.value = false
+                    }
 
-                AppConfig.MSG_STATE_STOP_SUCCESS -> {
-                    isRunning.value = false
+                    AppConfig.MSG_STATE_STOP_SUCCESS -> {
+                        isRunning.value = false
+                    }
                 }
             }
         }
-    }
 }

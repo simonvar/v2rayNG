@@ -91,12 +91,6 @@ object ShadowsocksFmt : FmtBase() {
         return config
     }
 
-    fun toUri(config: ProfileItem): String {
-        val pw = "${config.method}:${config.password}"
-
-        return toUri(config, Utils.encode(pw), null)
-    }
-
     fun toOutbound(profileItem: ProfileItem): OutboundBean? {
         val outboundBean = OutboundBean.create(EConfigType.SHADOWSOCKS)
 

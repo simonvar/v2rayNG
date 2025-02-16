@@ -34,7 +34,6 @@ object AppConfig {
     const val SUBSCRIPTION_AUTO_UPDATE = "pref_auto_update_subscription"
     const val SUBSCRIPTION_AUTO_UPDATE_INTERVAL = "pref_auto_update_interval"
     const val SUBSCRIPTION_DEFAULT_UPDATE_INTERVAL = "1440" // Default is 24 hours
-    const val SUBSCRIPTION_UPDATE_TASK_NAME = "subscription_updater"
     const val PREF_SPEED_ENABLED = "pref_speed_enabled"
     const val PREF_CONFIRM_REMOVE = "pref_confirm_remove"
     const val PREF_START_SCAN_IMMEDIATE = "pref_start_scan_immediate"
@@ -54,7 +53,6 @@ object AppConfig {
 
     /** Cache keys. */
     const val CACHE_SUBSCRIPTION_ID = "cache_subscription_id"
-    const val CACHE_KEYWORD_FILTER = "cache_keyword_filter"
 
     /** Protocol identifiers. */
     const val PROTOCOL_FREEDOM: String = "freedom"
@@ -79,12 +77,10 @@ object AppConfig {
         "https://raw.githubusercontent.com/2dust/androidpackagenamelist/master/proxy.txt"
 
     const val v2rayNGUrl = "https://github.com/2dust/v2rayNG"
-    const val v2rayNGIssues = "$v2rayNGUrl/issues"
     const val v2rayNGWikiMode = "$v2rayNGUrl/wiki/Mode"
     const val v2rayNGPrivacyPolicy = "https://raw.githubusercontent.com/2dust/v2rayNG/master/CR.md"
     const val PromotionUrl = "aHR0cHM6Ly85LjIzNDQ1Ni54eXovYWJjLmh0bWw="
     const val GeoUrl = "https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/"
-    const val TgChannelUrl = "https://t.me/github_2dust"
     const val DelayTestUrl = "https://www.gstatic.com/generate_204"
     const val DelayTestUrl2 = "https://www.google.com/generate_204"
 

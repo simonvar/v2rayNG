@@ -10,7 +10,6 @@ import com.v2ray.ang.util.Utils
 data class ProfileItem(
     val configVersion: Int = 4,
     val configType: EConfigType,
-    var subscriptionId: String = "",
     var addedTime: Long = System.currentTimeMillis(),
 
     var remarks: String = "",

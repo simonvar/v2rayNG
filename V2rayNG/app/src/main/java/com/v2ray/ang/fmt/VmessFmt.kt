@@ -17,6 +17,7 @@ import java.net.URI
 import kotlin.text.orEmpty
 
 object VmessFmt : FmtBase() {
+
     fun parse(str: String): ProfileItem? {
         if (str.indexOf('?') > 0 && str.indexOf('&') > 0) {
             return parseVmessStd(str)
@@ -73,44 +74,6 @@ object VmessFmt : FmtBase() {
         config.alpn = vmessQRCode.alpn
 
         return config
-    }
-
-    fun toUri(config: ProfileItem): String {
-        val vmessQRCode = VmessQRCode()
-
-        vmessQRCode.v = "2"
-        vmessQRCode.ps = config.remarks
-        vmessQRCode.add = config.server.orEmpty()
-        vmessQRCode.port = config.serverPort.orEmpty()
-        vmessQRCode.id = config.password.orEmpty()
-        vmessQRCode.scy = config.method.orEmpty()
-        vmessQRCode.aid = "0"
-
-        vmessQRCode.net = config.network.orEmpty()
-        vmessQRCode.type = config.headerType.orEmpty()
-        when (NetworkType.fromString(config.network)) {
-            NetworkType.KCP -> {
-                vmessQRCode.path = config.seed.orEmpty()
-            }
-
-            NetworkType.GRPC -> {
-                vmessQRCode.type = config.mode.orEmpty()
-                vmessQRCode.path = config.serviceName.orEmpty()
-                vmessQRCode.host = config.authority.orEmpty()
-            }
-            else -> {}
-        }
-
-        config.host.let { if (it.isNotNullEmpty()) vmessQRCode.host = it.orEmpty() }
-        config.path.let { if (it.isNotNullEmpty()) vmessQRCode.path = it.orEmpty() }
-
-        vmessQRCode.tls = config.security.orEmpty()
-        vmessQRCode.sni = config.sni.orEmpty()
-        vmessQRCode.fp = config.fingerPrint.orEmpty()
-        vmessQRCode.alpn = config.alpn.orEmpty()
-
-        val json = JsonUtil.toJson(vmessQRCode)
-        return Utils.encode(json)
     }
 
     fun parseVmessStd(str: String): ProfileItem? {

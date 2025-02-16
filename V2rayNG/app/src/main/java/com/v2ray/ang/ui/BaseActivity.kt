@@ -11,6 +11,7 @@ import com.v2ray.ang.util.MyContextWrapper
 import com.v2ray.ang.util.Utils
 
 abstract class BaseActivity : AppCompatActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)

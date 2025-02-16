@@ -37,12 +37,6 @@ object TrojanFmt : FmtBase() {
         return config
     }
 
-    fun toUri(config: ProfileItem): String {
-        val dicQuery = getQueryDic(config)
-
-        return toUri(config, config.password, dicQuery)
-    }
-
     fun toOutbound(profileItem: ProfileItem): OutboundBean? {
         val outboundBean = OutboundBean.create(EConfigType.TROJAN)
 

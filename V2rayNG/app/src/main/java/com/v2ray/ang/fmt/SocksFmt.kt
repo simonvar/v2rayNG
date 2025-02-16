@@ -33,13 +33,6 @@ object SocksFmt : FmtBase() {
         return config
     }
 
-    fun toUri(config: ProfileItem): String {
-        val pw =
-            if (config.username.isNotNullEmpty()) "${config.username}:${config.password}" else ":"
-
-        return toUri(config, Utils.encode(pw), null)
-    }
-
     fun toOutbound(profileItem: ProfileItem): OutboundBean? {
         val outboundBean = OutboundBean.create(EConfigType.SOCKS)
 

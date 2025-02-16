@@ -33,60 +33,6 @@ object WireguardFmt : FmtBase() {
         return config
     }
 
-    fun parseWireguardConfFile(str: String): ProfileItem? {
-        val config = ProfileItem.create(EConfigType.WIREGUARD)
-
-        val interfaceParams: MutableMap<String, String> = mutableMapOf()
-        val peerParams: MutableMap<String, String> = mutableMapOf()
-
-        var currentSection: String? = null
-
-        str.lines().forEach { line ->
-            val trimmedLine = line.trim()
-
-            if (trimmedLine.isEmpty() || trimmedLine.startsWith("#")) {
-                return@forEach
-            }
-
-            when {
-                trimmedLine.startsWith("[Interface]", ignoreCase = true) -> currentSection = "Interface"
-                trimmedLine.startsWith("[Peer]", ignoreCase = true) -> currentSection = "Peer"
-                else -> {
-                    if (currentSection != null) {
-                        val parts = trimmedLine.split("=", limit = 2).map { it.trim() }
-                        if (parts.size == 2) {
-                            val key = parts[0].lowercase()
-                            val value = parts[1]
-                            when (currentSection) {
-                                "Interface" -> interfaceParams[key] = value
-                                "Peer" -> peerParams[key] = value
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        config.secretKey = interfaceParams["privatekey"].orEmpty()
-        config.remarks = System.currentTimeMillis().toString()
-        config.localAddress = interfaceParams["address"] ?: WIREGUARD_LOCAL_ADDRESS_V4
-        config.mtu = Utils.parseInt(interfaceParams["mtu"] ?: AppConfig.WIREGUARD_LOCAL_MTU)
-        config.publicKey = peerParams["publickey"].orEmpty()
-        config.preSharedKey = peerParams["presharedkey"].orEmpty()
-        val endpoint = peerParams["endpoint"].orEmpty()
-        val endpointParts = endpoint.split(":", limit = 2)
-        if (endpointParts.size == 2) {
-            config.server = endpointParts[0]
-            config.serverPort = endpointParts[1]
-        } else {
-            config.server = endpoint
-            config.serverPort = ""
-        }
-        config.reserved = peerParams["reserved"] ?: "0,0,0"
-
-        return config
-    }
-
     fun toOutbound(profileItem: ProfileItem): OutboundBean? {
         val outboundBean = OutboundBean.create(EConfigType.WIREGUARD)
 
@@ -103,23 +49,5 @@ object WireguardFmt : FmtBase() {
         }
 
         return outboundBean
-    }
-
-    fun toUri(config: ProfileItem): String {
-        val dicQuery = HashMap<String, String>()
-
-        dicQuery["publickey"] = config.publicKey.orEmpty()
-        if (config.reserved != null) {
-            dicQuery["reserved"] = Utils.removeWhiteSpace(config.reserved).orEmpty()
-        }
-        dicQuery["address"] = Utils.removeWhiteSpace(config.localAddress).orEmpty()
-        if (config.mtu != null) {
-            dicQuery["mtu"] = config.mtu.toString()
-        }
-        if (config.preSharedKey != null) {
-            dicQuery["presharedkey"] = Utils.removeWhiteSpace(config.preSharedKey).orEmpty()
-        }
-
-        return toUri(config, config.secretKey, dicQuery)
     }
 }

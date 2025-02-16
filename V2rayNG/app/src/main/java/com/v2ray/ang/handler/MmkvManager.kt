@@ -6,8 +6,6 @@ import com.v2ray.ang.AppConfig.PREF_ROUTING_RULESET
 import com.v2ray.ang.dto.AssetUrlItem
 import com.v2ray.ang.dto.ProfileItem
 import com.v2ray.ang.dto.RulesetItem
-import com.v2ray.ang.dto.ServerAffiliationInfo
-import com.v2ray.ang.dto.SubscriptionItem
 import com.v2ray.ang.util.JsonUtil
 import com.v2ray.ang.util.Utils
 
@@ -17,7 +15,6 @@ object MmkvManager {
     private const val ID_MAIN = "MAIN"
     private const val ID_PROFILE_FULL_CONFIG = "PROFILE_FULL_CONFIG"
     private const val ID_SERVER_AFF = "SERVER_AFF"
-    private const val ID_SUB = "SUB"
     private const val ID_ASSET = "ASSET"
     private const val ID_SETTING = "SETTING"
     private const val KEY_SELECTED_SERVER = "SELECTED_SERVER"
@@ -28,7 +25,6 @@ object MmkvManager {
         MMKV.mmkvWithID(ID_PROFILE_FULL_CONFIG, MMKV.MULTI_PROCESS_MODE)
     }
     private val serverAffStorage by lazy { MMKV.mmkvWithID(ID_SERVER_AFF, MMKV.MULTI_PROCESS_MODE) }
-    private val subStorage by lazy { MMKV.mmkvWithID(ID_SUB, MMKV.MULTI_PROCESS_MODE) }
     private val assetStorage by lazy { MMKV.mmkvWithID(ID_ASSET, MMKV.MULTI_PROCESS_MODE) }
     private val settingsStorage by lazy { MMKV.mmkvWithID(ID_SETTING, MMKV.MULTI_PROCESS_MODE) }
 
@@ -90,35 +86,6 @@ object MmkvManager {
         encodeServerList(serverList)
         profileFullStorage.remove(guid)
         serverAffStorage.remove(guid)
-    }
-
-    fun removeServerViaSubid(subid: String) {
-        if (subid.isBlank()) {
-            return
-        }
-        profileFullStorage.allKeys()?.forEach { key ->
-            decodeServerConfig(key)?.let { config ->
-                if (config.subscriptionId == subid) {
-                    removeServer(key)
-                }
-            }
-        }
-    }
-
-    fun decodeServerAffiliationInfo(guid: String): ServerAffiliationInfo? {
-        if (guid.isBlank()) {
-            return null
-        }
-        val json = serverAffStorage.decodeString(guid)
-        if (json.isNullOrBlank()) {
-            return null
-        }
-        return JsonUtil.fromJson(json, ServerAffiliationInfo::class.java)
-    }
-
-    fun decodeSubscription(subscriptionId: String): SubscriptionItem? {
-        val json = subStorage.decodeString(subscriptionId) ?: return null
-        return JsonUtil.fromJson(json, SubscriptionItem::class.java)
     }
 
     fun decodeAssetUrls(): List<Pair<String, AssetUrlItem>> {
@@ -194,14 +161,7 @@ object MmkvManager {
         return settingsStorage.decodeStringSet(key)
     }
 
-    // endregion
-
-    // region Others
-
     fun decodeStartOnBoot(): Boolean {
         return decodeSettingsBool(PREF_IS_BOOTED, false)
     }
-
-    // endregion
-
 }

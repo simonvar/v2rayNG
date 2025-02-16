@@ -37,20 +37,7 @@ fun Long.toTrafficString(): String {
     return String.format("%.1f %s", size, units[unitIndex])
 }
 
-val URLConnection.responseLength: Long
-    get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-        contentLengthLong
-    } else {
-        contentLength.toLong()
-    }
-
 val URI.idnHost: String
     get() = host?.replace("[", "")?.replace("]", "").orEmpty()
-
-
-inline fun <reified T : Serializable> Intent.serializable(key: String): T? = when {
-    Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> getSerializableExtra(key, T::class.java)
-    else -> @Suppress("DEPRECATION") getSerializableExtra(key) as? T
-}
 
 fun CharSequence?.isNotNullEmpty(): Boolean = (this != null && this.isNotEmpty())

@@ -1,26 +1,20 @@
 package com.v2ray.ang.ui
 
 import android.annotation.SuppressLint
-import android.content.Intent
 import android.graphics.Color
 import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.v2ray.ang.AngApplication.Companion.application
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
-import com.v2ray.ang.databinding.ItemQrcodeBinding
 import com.v2ray.ang.databinding.ItemRecyclerFooterBinding
 import com.v2ray.ang.databinding.ItemRecyclerMainBinding
 import com.v2ray.ang.extension.toast
-import com.v2ray.ang.handler.AngConfigManager
 import com.v2ray.ang.handler.MmkvManager
-import com.v2ray.ang.helper.ItemTouchHelperAdapter
-import com.v2ray.ang.helper.ItemTouchHelperViewHolder
 import com.v2ray.ang.service.V2RayServiceManager
 import com.v2ray.ang.util.Utils
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
@@ -28,7 +22,7 @@ import io.reactivex.rxjava3.core.Observable
 import java.util.concurrent.TimeUnit
 
 class MainRecyclerAdapter(val activity: MainActivity) :
-    RecyclerView.Adapter<MainRecyclerAdapter.BaseViewHolder>(), ItemTouchHelperAdapter {
+    RecyclerView.Adapter<MainRecyclerAdapter.BaseViewHolder>() {
 
     companion object {
         private const val VIEW_TYPE_ITEM = 1
@@ -36,9 +30,6 @@ class MainRecyclerAdapter(val activity: MainActivity) :
     }
 
     private var mActivity: MainActivity = activity
-    private val share_method: Array<out String> by lazy {
-        mActivity.resources.getStringArray(R.array.share_method)
-    }
     var isRunning = false
 
     override fun getItemCount() = mActivity.mainViewModel.serversCache.size + 1
@@ -49,29 +40,15 @@ class MainRecyclerAdapter(val activity: MainActivity) :
             val guid = mActivity.mainViewModel.serversCache[position].guid
             val profile = mActivity.mainViewModel.serversCache[position].profile
 
-            val aff = MmkvManager.decodeServerAffiliationInfo(guid)
-
             holder.itemMainBinding.tvName.text = profile.remarks
             holder.itemView.setBackgroundColor(Color.TRANSPARENT)
-            holder.itemMainBinding.tvTestResult.text = aff?.getTestDelayString().orEmpty()
-            if ((aff?.testDelayMillis ?: 0L) < 0L) {
-                holder.itemMainBinding.tvTestResult.setTextColor(
-                    ContextCompat.getColor(mActivity, R.color.colorPingRed)
-                )
-            } else {
-                holder.itemMainBinding.tvTestResult.setTextColor(
-                    ContextCompat.getColor(mActivity, R.color.colorPing)
-                )
-            }
+
             if (guid == MmkvManager.getSelectServer()) {
                 holder.itemMainBinding.layoutIndicator.setBackgroundResource(R.color.colorAccent)
             } else {
                 holder.itemMainBinding.layoutIndicator.setBackgroundResource(0)
             }
-            holder.itemMainBinding.tvSubscription.text =
-                MmkvManager.decodeSubscription(profile.subscriptionId)?.remarks ?: ""
 
-            var shareOptions = share_method.asList()
             holder.itemMainBinding.tvType.text = profile.configType.name
 
             // 隐藏主页服务器地址为xxx:xxx:***/xxx.xxx.xxx.***
@@ -86,7 +63,6 @@ class MainRecyclerAdapter(val activity: MainActivity) :
             } : ${profile.serverPort}"
 
             holder.itemMainBinding.tvStatistics.text = strState
-
 
             holder.itemMainBinding.layoutRemove.setOnClickListener {
                 if (guid != MmkvManager.getSelectServer()) {
@@ -186,20 +162,8 @@ class MainRecyclerAdapter(val activity: MainActivity) :
     }
 
     class MainViewHolder(val itemMainBinding: ItemRecyclerMainBinding) :
-        BaseViewHolder(itemMainBinding.root), ItemTouchHelperViewHolder
+        BaseViewHolder(itemMainBinding.root)
 
     class FooterViewHolder(val itemFooterBinding: ItemRecyclerFooterBinding) :
         BaseViewHolder(itemFooterBinding.root)
-
-    override fun onItemMove(fromPosition: Int, toPosition: Int): Boolean {
-        mActivity.mainViewModel.swapServer(fromPosition, toPosition)
-        notifyItemMoved(fromPosition, toPosition)
-        return true
-    }
-
-    override fun onItemMoveCompleted() {
-        // do nothing
-    }
-
-    override fun onItemDismiss(position: Int) {}
 }

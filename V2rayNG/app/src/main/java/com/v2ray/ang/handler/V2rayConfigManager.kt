@@ -74,12 +74,11 @@ object V2rayConfigManager {
             }
         }
 
-        // 取得默认配置
         val assets = Utils.readTextFromAssets(context, "v2ray_config.json")
         if (TextUtils.isEmpty(assets)) {
             return result
         }
-        val v2rayConfig = JsonUtil.fromJson(assets, V2rayConfig::class.java) ?: return result
+        val v2rayConfig = JsonUtil.fromJson(assets, V2rayConfig::class.java)
         v2rayConfig.log.loglevel =
             MmkvManager.decodeSettingsString(AppConfig.PREF_LOGLEVEL) ?: "warning"
         v2rayConfig.remarks = config.remarks
@@ -87,12 +86,9 @@ object V2rayConfigManager {
         inbounds(v2rayConfig)
 
         val retOut = outbounds(v2rayConfig, config) ?: return result
-        val retMore = moreOutbounds(v2rayConfig, config.subscriptionId)
 
         routing(v2rayConfig)
-
         fakedns(v2rayConfig)
-
         dns(v2rayConfig)
 
         if (MmkvManager.decodeSettingsBool(AppConfig.PREF_LOCAL_DNS_ENABLED) == true) {
@@ -105,7 +101,7 @@ object V2rayConfigManager {
 
         result.status = true
         result.content = v2rayConfig.toPrettyPrinting()
-        result.domainPort = if (retMore.first) retMore.second else retOut.second
+        result.domainPort = retOut.second
         return result
     }
 
@@ -555,69 +551,6 @@ object V2rayConfigManager {
             return false
         }
         return true
-    }
-
-    private fun moreOutbounds(
-        v2rayConfig: V2rayConfig,
-        subscriptionId: String,
-    ): Pair<Boolean, String> {
-        val returnPair = Pair(false, "")
-        var domainPort: String = ""
-
-        // fragment proxy
-        if (MmkvManager.decodeSettingsBool(AppConfig.PREF_FRAGMENT_ENABLED, false) == true) {
-            return returnPair
-        }
-
-        if (subscriptionId.isEmpty()) {
-            return returnPair
-        }
-        try {
-            val subItem = MmkvManager.decodeSubscription(subscriptionId) ?: return returnPair
-
-            // current proxy
-            val outbound = v2rayConfig.outbounds[0]
-
-            // Previous proxy
-            val prevNode = SettingsManager.getServerViaRemarks(subItem.prevProfile)
-            if (prevNode != null) {
-                val prevOutbound = getProxyOutbound(prevNode)
-                if (prevOutbound != null) {
-                    updateOutboundWithGlobalSettings(prevOutbound)
-                    prevOutbound.tag = TAG_PROXY + "2"
-                    v2rayConfig.outbounds.add(prevOutbound)
-                    outbound.streamSettings?.sockopt =
-                        V2rayConfig.OutboundBean.StreamSettingsBean.SockoptBean(
-                            dialerProxy = prevOutbound.tag
-                        )
-                    domainPort = prevNode.getServerAddressAndPort()
-                }
-            }
-
-            // Next proxy
-            val nextNode = SettingsManager.getServerViaRemarks(subItem.nextProfile)
-            if (nextNode != null) {
-                val nextOutbound = getProxyOutbound(nextNode)
-                if (nextOutbound != null) {
-                    updateOutboundWithGlobalSettings(nextOutbound)
-                    nextOutbound.tag = TAG_PROXY
-                    v2rayConfig.outbounds.add(0, nextOutbound)
-                    outbound.tag = TAG_PROXY + "1"
-                    nextOutbound.streamSettings?.sockopt =
-                        V2rayConfig.OutboundBean.StreamSettingsBean.SockoptBean(
-                            dialerProxy = outbound.tag
-                        )
-                }
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            return returnPair
-        }
-
-        if (domainPort.isNotEmpty()) {
-            return Pair(true, domainPort)
-        }
-        return returnPair
     }
 
     fun getProxyOutbound(profileItem: ProfileItem): V2rayConfig.OutboundBean? {
