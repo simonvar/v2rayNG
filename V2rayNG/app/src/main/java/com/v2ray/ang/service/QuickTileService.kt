@@ -17,7 +17,7 @@ import com.v2ray.ang.util.Utils
 import java.lang.ref.SoftReference
 
 @TargetApi(Build.VERSION_CODES.N)
-class QSTileService : TileService() {
+class QuickTileService : TileService() {
 
     fun setState(state: Int) {
         if (state == Tile.STATE_INACTIVE) {
@@ -32,11 +32,6 @@ class QSTileService : TileService() {
 
         qsTile?.updateTile()
     }
-
-    /**
-     * Refer to the official documentation for [registerReceiver](https://developer.android.com/reference/androidx/core/content/ContextCompat#registerReceiver(android.content.Context,android.content.BroadcastReceiver,android.content.IntentFilter,int):
-     * `registerReceiver(Context, BroadcastReceiver, IntentFilter, int)`.
-     */
 
     override fun onStartListening() {
         super.onStartListening()
@@ -75,8 +70,8 @@ class QSTileService : TileService() {
 
     private var mMsgReceive: BroadcastReceiver? = null
 
-    private class ReceiveMessageHandler(context: QSTileService) : BroadcastReceiver() {
-        var mReference: SoftReference<QSTileService> = SoftReference(context)
+    private class ReceiveMessageHandler(context: QuickTileService) : BroadcastReceiver() {
+        var mReference: SoftReference<QuickTileService> = SoftReference(context)
         override fun onReceive(ctx: Context?, intent: Intent?) {
             val context = mReference.get()
             when (intent?.getIntExtra("key", 0)) {

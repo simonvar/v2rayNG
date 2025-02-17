@@ -137,7 +137,7 @@
         </receiver>
 
         <service
-            android:name=".service.QSTileService"
+            android:name=".service.QuickTileService"
             android:exported="true"
             android:foregroundServiceType="specialUse"
             android:icon="@drawable/ic_stat_name"

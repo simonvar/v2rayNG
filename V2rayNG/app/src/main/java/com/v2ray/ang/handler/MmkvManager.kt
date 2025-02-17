@@ -94,12 +94,7 @@ object MmkvManager {
         else encodeSettings(PREF_ROUTING_RULESET, JsonUtil.toJson(rulesetList))
     }
 
-    // endregion
     fun encodeSettings(key: String, value: String?): Boolean {
-        return settingsStorage.encode(key, value)
-    }
-
-    fun encodeSettings(key: String, value: Boolean): Boolean {
         return settingsStorage.encode(key, value)
     }
 
