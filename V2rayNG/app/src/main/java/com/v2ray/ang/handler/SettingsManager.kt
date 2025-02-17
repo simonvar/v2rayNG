@@ -9,11 +9,8 @@ import com.v2ray.ang.AppConfig.ANG_PACKAGE
 import com.v2ray.ang.AppConfig.GEOIP_PRIVATE
 import com.v2ray.ang.AppConfig.GEOSITE_PRIVATE
 import com.v2ray.ang.AppConfig.TAG_DIRECT
-import com.v2ray.ang.dto.ProfileItem
 import com.v2ray.ang.dto.RoutingType
 import com.v2ray.ang.dto.RulesetItem
-import com.v2ray.ang.handler.MmkvManager.decodeServerConfig
-import com.v2ray.ang.handler.MmkvManager.decodeServerList
 import com.v2ray.ang.util.JsonUtil
 import com.v2ray.ang.util.Utils
 import com.v2ray.ang.util.Utils.parseInt
@@ -61,20 +58,6 @@ object SettingsManager {
                         it.ip?.contains(GEOIP_PRIVATE) == true
                 }
         return exist == true
-    }
-
-    fun getServerViaRemarks(remarks: String?): ProfileItem? {
-        if (remarks == null) {
-            return null
-        }
-        val serverList = decodeServerList()
-        for (guid in serverList) {
-            val profile = decodeServerConfig(guid)
-            if (profile != null && profile.remarks == remarks) {
-                return profile
-            }
-        }
-        return null
     }
 
     fun getSocksPort(): Int {

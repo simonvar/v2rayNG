@@ -1,17 +1,14 @@
 package com.v2ray.ang.util
 
-import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.content.res.Configuration.UI_MODE_NIGHT_MASK
 import android.content.res.Configuration.UI_MODE_NIGHT_NO
 import android.net.Uri
 import android.os.Build
 import android.os.LocaleList
 import android.provider.Settings
-import android.text.Editable
 import android.util.Base64
 import android.util.Log
 import android.util.Patterns
@@ -20,32 +17,16 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.AppConfig.ANG_PACKAGE
-import com.v2ray.ang.AppConfig.LOOPBACK
-import com.v2ray.ang.BuildConfig
 import com.v2ray.ang.R
 import com.v2ray.ang.dto.Language
 import com.v2ray.ang.extension.toast
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.service.V2RayServiceManager
-import java.io.IOException
 import java.net.*
 import java.util.*
 
 object Utils {
 
-    /**
-     * convert string to editalbe for kotlin
-     *
-     * @param text
-     * @return
-     */
-    fun getEditable(text: String?): Editable {
-        return Editable.Factory.getInstance().newEditable(text.orEmpty())
-    }
-
-    /**
-     * parseInt
-     */
     fun parseInt(str: String): Int {
         return parseInt(str, 0)
     }
@@ -54,10 +35,6 @@ object Utils {
         return str?.toIntOrNull() ?: default
     }
 
-
-    /**
-     * get text from clipboard
-     */
     fun getClipboard(context: Context): String {
         return try {
             val cmb = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
@@ -68,26 +45,10 @@ object Utils {
         }
     }
 
-    /**
-     * set text to clipboard
-     */
-    fun setClipboard(context: Context, content: String) {
-        try {
-            val cmb = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-            val clipData = ClipData.newPlainText(null, content)
-            cmb.setPrimaryClip(clipData)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-
-    /**
-     * base64 decode
-     */
+    /** base64 decode */
     fun decode(text: String?): String {
         return tryDecodeBase64(text) ?: text?.trimEnd('=')?.let { tryDecodeBase64(it) }.orEmpty()
     }
-
 
     fun tryDecodeBase64(text: String?): String? {
         try {
@@ -103,21 +64,7 @@ object Utils {
         return null
     }
 
-    /**
-     * base64 encode
-     */
-    fun encode(text: String): String {
-        return try {
-            Base64.encodeToString(text.toByteArray(Charsets.UTF_8), Base64.NO_WRAP)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            ""
-        }
-    }
-
-    /**
-     * get remote dns servers from preference
-     */
+    /** get remote dns servers from preference */
     fun getRemoteDnsServers(): List<String> {
         val remoteDns =
             MmkvManager.decodeSettingsString(AppConfig.PREF_REMOTE_DNS) ?: AppConfig.DNS_PROXY
@@ -134,9 +81,7 @@ object Utils {
         // allow empty, in that case dns will use system default
     }
 
-    /**
-     * get remote dns servers from preference
-     */
+    /** get remote dns servers from preference */
     fun getDomesticDnsServers(): List<String> {
         val domesticDns =
             MmkvManager.decodeSettingsString(AppConfig.PREF_DOMESTIC_DNS) ?: AppConfig.DNS_DIRECT
@@ -147,9 +92,7 @@ object Utils {
         return ret
     }
 
-    /**
-     * is ip address
-     */
+    /** is ip address */
     fun isIpAddress(value: String?): Boolean {
         try {
             if (value.isNullOrEmpty()) {
@@ -159,7 +102,7 @@ object Utils {
             if (addr.isEmpty() || addr.isBlank()) {
                 return false
             }
-            //CIDR
+            // CIDR
             if (addr.indexOf("/") > 0) {
                 val arr = addr.split("/")
                 if (arr.count() == 2 && Integer.parseInt(arr[1]) > -1) {
@@ -198,7 +141,9 @@ object Utils {
 
     fun isIpv4Address(value: String): Boolean {
         val regV4 =
-            Regex("^([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\\.([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\\.([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\\.([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])$")
+            Regex(
+                "^([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\\.([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\\.([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\\.([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])$"
+            )
         return regV4.matches(value)
     }
 
@@ -209,25 +154,29 @@ object Utils {
             addr = addr.dropLast(addr.count() - addr.lastIndexOf("]"))
         }
         val regV6 =
-            Regex("^((?:[0-9A-Fa-f]{1,4}))?((?::[0-9A-Fa-f]{1,4}))*::((?:[0-9A-Fa-f]{1,4}))?((?::[0-9A-Fa-f]{1,4}))*|((?:[0-9A-Fa-f]{1,4}))((?::[0-9A-Fa-f]{1,4})){7}$")
+            Regex(
+                "^((?:[0-9A-Fa-f]{1,4}))?((?::[0-9A-Fa-f]{1,4}))*::((?:[0-9A-Fa-f]{1,4}))?((?::[0-9A-Fa-f]{1,4}))*|((?:[0-9A-Fa-f]{1,4}))((?::[0-9A-Fa-f]{1,4})){7}$"
+            )
         return regV6.matches(addr)
     }
 
     private fun isCoreDNSAddress(s: String): Boolean {
-        return s.startsWith("https") || s.startsWith("tcp") || s.startsWith("quic") || s == "localhost"
+        return s.startsWith("https") ||
+            s.startsWith("tcp") ||
+            s.startsWith("quic") ||
+            s == "localhost"
     }
 
-    /**
-     * is valid url
-     */
+    /** is valid url */
     fun isValidUrl(value: String?): Boolean {
         try {
             if (value.isNullOrEmpty()) {
                 return false
             }
-            if (Patterns.WEB_URL.matcher(value).matches()
-                || Patterns.DOMAIN_NAME.matcher(value).matches()
-                || URLUtil.isValidUrl(value)
+            if (
+                Patterns.WEB_URL.matcher(value).matches() ||
+                    Patterns.DOMAIN_NAME.matcher(value).matches() ||
+                    URLUtil.isValidUrl(value)
             ) {
                 return true
             }
@@ -247,9 +196,7 @@ object Utils {
         return true
     }
 
-    /**
-     * stopVService
-     */
+    /** stopVService */
     fun stopVService(context: Context) {
         context.toast(R.string.toast_services_stop)
         MessageUtil.sendMsg2Service(context, AppConfig.MSG_STATE_STOP, "")
@@ -260,9 +207,7 @@ object Utils {
         context.startActivity(Intent(Intent.ACTION_VIEW, uri))
     }
 
-    /**
-     * uuid
-     */
+    /** uuid */
     fun getUuid(): String {
         return try {
             UUID.randomUUID().toString().replace("-", "")
@@ -281,51 +226,26 @@ object Utils {
         }
     }
 
-    /**
-     * readTextFromAssets
-     */
+    /** readTextFromAssets */
     fun readTextFromAssets(context: Context?, fileName: String): String {
         if (context == null) {
             return ""
         }
-        val content = context.assets.open(fileName).bufferedReader().use {
-            it.readText()
-        }
+        val content = context.assets.open(fileName).bufferedReader().use { it.readText() }
         return content
     }
 
     fun userAssetPath(context: Context?): String {
-        if (context == null)
-            return ""
-        val extDir = context.getExternalFilesDir(AppConfig.DIR_ASSETS)
-            ?: return context.getDir(AppConfig.DIR_ASSETS, 0).absolutePath
+        if (context == null) return ""
+        val extDir =
+            context.getExternalFilesDir(AppConfig.DIR_ASSETS)
+                ?: return context.getDir(AppConfig.DIR_ASSETS, 0).absolutePath
         return extDir.absolutePath
     }
 
     fun getDeviceIdForXUDPBaseKey(): String {
         val androidId = Settings.Secure.ANDROID_ID.toByteArray(Charsets.UTF_8)
         return Base64.encodeToString(androidId.copyOf(32), Base64.NO_PADDING.or(Base64.URL_SAFE))
-    }
-
-    fun getUrlContext(url: String, timeout: Int): String {
-        var result: String
-        var conn: HttpURLConnection? = null
-
-        try {
-            conn = URL(url).openConnection() as HttpURLConnection
-            conn.connectTimeout = timeout
-            conn.readTimeout = timeout
-            conn.setRequestProperty("Connection", "close")
-            conn.instanceFollowRedirects = false
-            conn.useCaches = false
-            //val code = conn.responseCode
-            result = conn.inputStream.bufferedReader().readText()
-        } catch (e: Exception) {
-            result = ""
-        } finally {
-            conn?.disconnect()
-        }
-        return result
     }
 
     fun getDarkModeStatus(context: Context): Boolean {
@@ -369,16 +289,15 @@ object Utils {
         }
     }
 
-    private fun getSysLocale(): Locale = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-        LocaleList.getDefault()[0]
-    } else {
-        Locale.getDefault()
-    }
+    private fun getSysLocale(): Locale =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            LocaleList.getDefault()[0]
+        } else {
+            Locale.getDefault()
+        }
 
     fun fixIllegalUrl(str: String): String {
-        return str
-            .replace(" ", "%20")
-            .replace("|", "%7C")
+        return str.replace(" ", "%20").replace("|", "%7C")
     }
 
     fun getDelayTestUrl(second: Boolean = false): String {
@@ -390,12 +309,12 @@ object Utils {
         }
     }
 
-    fun receiverFlags(): Int = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        ContextCompat.RECEIVER_EXPORTED
-    } else {
-        ContextCompat.RECEIVER_NOT_EXPORTED
-    }
+    fun receiverFlags(): Int =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ContextCompat.RECEIVER_EXPORTED
+        } else {
+            ContextCompat.RECEIVER_NOT_EXPORTED
+        }
 
     fun isXray(): Boolean = (ANG_PACKAGE.startsWith("com.v2ray.ang"))
 }
-

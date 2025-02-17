@@ -7,7 +7,6 @@ object AppConfig {
 
     /** Directory names used in the app's file system. */
     const val DIR_ASSETS = "assets"
-    const val DIR_BACKUPS = "backups"
 
     /** Preferences mapped to MMKV storage. */
     const val PREF_SNIFFING_ENABLED = "pref_sniffing_enabled"
@@ -31,12 +30,8 @@ object AppConfig {
     const val PREF_FRAGMENT_PACKETS = "pref_fragment_packets"
     const val PREF_FRAGMENT_LENGTH = "pref_fragment_length"
     const val PREF_FRAGMENT_INTERVAL = "pref_fragment_interval"
-    const val SUBSCRIPTION_AUTO_UPDATE = "pref_auto_update_subscription"
-    const val SUBSCRIPTION_AUTO_UPDATE_INTERVAL = "pref_auto_update_interval"
-    const val SUBSCRIPTION_DEFAULT_UPDATE_INTERVAL = "1440" // Default is 24 hours
     const val PREF_SPEED_ENABLED = "pref_speed_enabled"
     const val PREF_CONFIRM_REMOVE = "pref_confirm_remove"
-    const val PREF_START_SCAN_IMMEDIATE = "pref_start_scan_immediate"
     const val PREF_LANGUAGE = "pref_language"
     const val PREF_UI_MODE_NIGHT = "pref_ui_mode_night"
     const val PREF_PREFER_IPV6 = "pref_prefer_ipv6"
@@ -50,9 +45,6 @@ object AppConfig {
     const val PREF_LOGLEVEL = "pref_core_loglevel"
     const val PREF_MODE = "pref_mode"
     const val PREF_IS_BOOTED = "pref_is_booted"
-
-    /** Cache keys. */
-    const val CACHE_SUBSCRIPTION_ID = "cache_subscription_id"
 
     /** Protocol identifiers. */
     const val PROTOCOL_FREEDOM: String = "freedom"
@@ -72,15 +64,6 @@ object AppConfig {
     const val UPLINK = "uplink"
     const val DOWNLINK = "downlink"
 
-    /** URLs for various resources. */
-    const val androidpackagenamelistUrl =
-        "https://raw.githubusercontent.com/2dust/androidpackagenamelist/master/proxy.txt"
-
-    const val v2rayNGUrl = "https://github.com/2dust/v2rayNG"
-    const val v2rayNGWikiMode = "$v2rayNGUrl/wiki/Mode"
-    const val v2rayNGPrivacyPolicy = "https://raw.githubusercontent.com/2dust/v2rayNG/master/CR.md"
-    const val PromotionUrl = "aHR0cHM6Ly85LjIzNDQ1Ni54eXovYWJjLmh0bWw="
-    const val GeoUrl = "https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/"
     const val DelayTestUrl = "https://www.gstatic.com/generate_204"
     const val DelayTestUrl2 = "https://www.google.com/generate_204"
 
@@ -114,7 +97,6 @@ object AppConfig {
     const val MSG_STATE_RESTART = 5
     const val MSG_MEASURE_DELAY = 6
     const val MSG_MEASURE_DELAY_SUCCESS = 61
-    const val MSG_MEASURE_CONFIG_SUCCESS = 71
 
     /** Notification channel IDs and names. */
     const val RAY_NG_CHANNEL_ID = "RAY_NG_M_CH_ID"

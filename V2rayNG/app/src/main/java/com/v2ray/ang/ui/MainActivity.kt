@@ -1,6 +1,5 @@
 package com.v2ray.ang.ui
 
-import android.content.Intent
 import android.content.res.ColorStateList
 import android.net.VpnService
 import android.os.Bundle
@@ -15,7 +14,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.navigation.NavigationView
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.AppConfig.VPN
 import com.v2ray.ang.R
@@ -31,7 +29,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedListener {
+class MainActivity : BaseActivity() {
 
     private val binding by lazy { ActivityMainBinding.inflate(layoutInflater) }
 
@@ -81,7 +79,6 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             )
         binding.drawerLayout.addDrawerListener(toggle)
         toggle.syncState()
-        binding.navView.setNavigationItemSelectedListener(this)
 
         setupViewModel()
 
@@ -200,23 +197,5 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             return true
         }
         return super.onKeyDown(keyCode, event)
-    }
-
-    override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        // Handle navigation view item clicks here.
-        when (item.itemId) {
-            R.id.settings -> {
-                startActivity(
-                    Intent(this, SettingsActivity::class.java)
-                        .putExtra("isRunning", mainViewModel.isRunning.value == true)
-                )
-            }
-
-            R.id.about -> {
-                startActivity(Intent(this, AboutActivity::class.java))
-            }
-        }
-        binding.drawerLayout.closeDrawer(GravityCompat.START)
-        return true
     }
 }

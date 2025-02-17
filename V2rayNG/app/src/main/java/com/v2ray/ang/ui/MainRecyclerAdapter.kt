@@ -51,7 +51,6 @@ class MainRecyclerAdapter(val activity: MainActivity) :
 
             holder.itemMainBinding.tvType.text = profile.configType.name
 
-            // 隐藏主页服务器地址为xxx:xxx:***/xxx.xxx.xxx.***
             val strState =
                 "${
                 profile.server?.let {
@@ -104,13 +103,6 @@ class MainRecyclerAdapter(val activity: MainActivity) :
         if (holder is FooterViewHolder) {
             if (true) {
                 holder.itemFooterBinding.layoutEdit.visibility = View.INVISIBLE
-            } else {
-                holder.itemFooterBinding.layoutEdit.setOnClickListener {
-                    Utils.openUri(
-                        mActivity,
-                        "${Utils.decode(AppConfig.PromotionUrl)}?t=${System.currentTimeMillis()}",
-                    )
-                }
             }
         }
     }

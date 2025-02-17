@@ -75,18 +75,6 @@
                 android:name="android.app.shortcuts"
                 android:resource="@xml/shortcuts" />
         </activity>
-        <activity
-            android:name=".ui.SettingsActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.PerAppProxyActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.UserAssetActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.UserAssetUrlActivity"
-            android:exported="false" />
 
         <activity
             android:name=".ui.ShortcutSwitchActivity"
@@ -94,10 +82,6 @@
             android:exported="false"
             android:process=":RunSoLibV2RayDaemon"
             android:theme="@style/AppTheme.NoActionBar.Translucent" />
-
-        <activity
-            android:name=".ui.AboutActivity"
-            android:exported="false" />
 
         <service
             android:name=".service.V2RayVpnService"
