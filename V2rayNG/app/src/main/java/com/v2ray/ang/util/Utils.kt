@@ -321,14 +321,12 @@ object Utils {
         for (port in ports) {
             try {
                 return ServerSocket(port).use { it.localPort }
-            } catch (ex: IOException) {
-                continue  // try next port
+            } catch (_: IOException) {
+                continue // try next port
             }
         }
-
-        // if the program gets here, no port in the range was found
         throw IOException("no free port found")
     }
 
-    fun isXray(): Boolean = (ANG_PACKAGE.startsWith("com.v2ray.ang"))
+    fun isXray(): Boolean = true // (ANG_PACKAGE.startsWith("com.v2ray.ang"))
 }
