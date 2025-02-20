@@ -1,8 +1,10 @@
 package com.v2ray.ang.handler
 
 import android.text.TextUtils
+import com.v2ray.ang.AppConfig.HY2
 import com.v2ray.ang.R
 import com.v2ray.ang.dto.*
+import com.v2ray.ang.fmt.Hysteria2Fmt
 import com.v2ray.ang.fmt.ShadowsocksFmt
 import com.v2ray.ang.fmt.SocksFmt
 import com.v2ray.ang.fmt.TrojanFmt
@@ -60,6 +62,10 @@ object AngConfigManager {
                     VlessFmt.parse(str)
                 } else if (str.startsWith(EConfigType.WIREGUARD.protocolScheme)) {
                     WireguardFmt.parse(str)
+                } else if (
+                    str.startsWith(EConfigType.HYSTERIA2.protocolScheme) || str.startsWith(HY2)
+                ) {
+                    Hysteria2Fmt.parse(str)
                 } else {
                     null
                 }

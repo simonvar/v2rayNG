@@ -22,6 +22,7 @@ import com.v2ray.ang.dto.Language
 import com.v2ray.ang.extension.toast
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.service.V2RayServiceManager
+import java.io.IOException
 import java.net.*
 import java.util.*
 
@@ -315,6 +316,19 @@ object Utils {
         } else {
             ContextCompat.RECEIVER_NOT_EXPORTED
         }
+
+    fun findFreePort(ports: List<Int>): Int {
+        for (port in ports) {
+            try {
+                return ServerSocket(port).use { it.localPort }
+            } catch (ex: IOException) {
+                continue  // try next port
+            }
+        }
+
+        // if the program gets here, no port in the range was found
+        throw IOException("no free port found")
+    }
 
     fun isXray(): Boolean = (ANG_PACKAGE.startsWith("com.v2ray.ang"))
 }

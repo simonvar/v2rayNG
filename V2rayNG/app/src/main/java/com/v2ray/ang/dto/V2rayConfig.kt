@@ -91,7 +91,8 @@ data class V2rayConfig(
 
                     EConfigType.SHADOWSOCKS,
                     EConfigType.SOCKS,
-                    EConfigType.TROJAN ->
+                    EConfigType.TROJAN,
+                    EConfigType.HYSTERIA2 ->
                         return OutboundBean(
                             protocol = configType.name.lowercase(),
                             settings = OutSettingsBean(servers = listOf(ServersBean())),
@@ -483,7 +484,8 @@ data class V2rayConfig(
             } else if (
                 protocol.equals(EConfigType.SHADOWSOCKS.name, true) ||
                     protocol.equals(EConfigType.SOCKS.name, true) ||
-                    protocol.equals(EConfigType.TROJAN.name, true)
+                    protocol.equals(EConfigType.TROJAN.name, true) ||
+                    protocol.equals(EConfigType.HYSTERIA2.name, true)
             ) {
                 return settings?.servers?.first()?.address
             } else if (protocol.equals(EConfigType.WIREGUARD.name, true)) {
@@ -501,7 +503,8 @@ data class V2rayConfig(
             } else if (
                 protocol.equals(EConfigType.SHADOWSOCKS.name, true) ||
                     protocol.equals(EConfigType.SOCKS.name, true) ||
-                    protocol.equals(EConfigType.TROJAN.name, true)
+                    protocol.equals(EConfigType.TROJAN.name, true) ||
+                    protocol.equals(EConfigType.HYSTERIA2.name, true)
             ) {
                 return settings?.servers?.first()?.port
             } else if (protocol.equals(EConfigType.WIREGUARD.name, true)) {
@@ -576,6 +579,17 @@ data class V2rayConfig(
         var ipPool: String = "198.18.0.0/15",
         var poolSize: Int = 10000,
     ) // roughly 10 times smaller than total ip pool
+
+    fun getProxyOutbound(): OutboundBean? {
+        outbounds.forEach { outbound ->
+            EConfigType.entries.forEach {
+                if (outbound.protocol.equals(it.name, true)) {
+                    return outbound
+                }
+            }
+        }
+        return null
+    }
 
     fun toPrettyPrinting(): String {
         return GsonBuilder()

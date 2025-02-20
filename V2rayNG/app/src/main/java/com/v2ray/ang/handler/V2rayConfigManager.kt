@@ -40,6 +40,7 @@ import com.v2ray.ang.dto.RulesetItem
 import com.v2ray.ang.dto.V2rayConfig
 import com.v2ray.ang.dto.V2rayConfig.RoutingBean.RulesBean
 import com.v2ray.ang.extension.isNotNullEmpty
+import com.v2ray.ang.fmt.Hysteria2Fmt
 import com.v2ray.ang.fmt.ShadowsocksFmt
 import com.v2ray.ang.fmt.SocksFmt
 import com.v2ray.ang.fmt.TrojanFmt
@@ -85,7 +86,9 @@ object V2rayConfigManager {
 
         inbounds(v2rayConfig)
 
-        val retOut = outbounds(v2rayConfig, config) ?: return result
+        val isPlugin = config.configType == EConfigType.HYSTERIA2
+        val retOut = outbounds(v2rayConfig, config, isPlugin) ?: return result
+        val retMore = moreOutbounds(v2rayConfig, isPlugin)
 
         routing(v2rayConfig)
         fakedns(v2rayConfig)
@@ -101,7 +104,7 @@ object V2rayConfigManager {
 
         result.status = true
         result.content = v2rayConfig.toPrettyPrinting()
-        result.domainPort = retOut.second
+        result.domainPort = if (retMore.first) retMore.second else retOut.second
         return result
     }
 
@@ -142,7 +145,36 @@ object V2rayConfigManager {
         return true
     }
 
-    private fun outbounds(v2rayConfig: V2rayConfig, config: ProfileItem): Pair<Boolean, String>? {
+    private fun outbounds(
+        v2rayConfig: V2rayConfig,
+        config: ProfileItem,
+        isPlugin: Boolean,
+    ): Pair<Boolean, String>? {
+        if (isPlugin) {
+            val socksPort = Utils.findFreePort(listOf(100 + SettingsManager.getSocksPort(), 0))
+            val outboundNew =
+                V2rayConfig.OutboundBean(
+                    mux = null,
+                    protocol = EConfigType.SOCKS.name.lowercase(),
+                    settings =
+                        V2rayConfig.OutboundBean.OutSettingsBean(
+                            servers =
+                                listOf(
+                                    V2rayConfig.OutboundBean.OutSettingsBean.ServersBean(
+                                        address = LOOPBACK,
+                                        port = socksPort,
+                                    )
+                                )
+                        ),
+                )
+            if (v2rayConfig.outbounds.isNotEmpty()) {
+                v2rayConfig.outbounds[0] = outboundNew
+            } else {
+                v2rayConfig.outbounds.add(outboundNew)
+            }
+            return Pair(true, outboundNew.getServerAddressAndPort())
+        }
+
         val outbound = getProxyOutbound(config) ?: return null
         val ret = updateOutboundWithGlobalSettings(outbound)
         if (!ret) return null
@@ -403,7 +435,8 @@ object V2rayConfigManager {
                 protocol.equals(EConfigType.SHADOWSOCKS.name, true) ||
                     protocol.equals(EConfigType.SOCKS.name, true) ||
                     protocol.equals(EConfigType.TROJAN.name, true) ||
-                    protocol.equals(EConfigType.WIREGUARD.name, true)
+                    protocol.equals(EConfigType.WIREGUARD.name, true) ||
+                    protocol.equals(EConfigType.HYSTERIA2.name, true)
             ) {
                 muxEnabled = false
             } else if (outbound.streamSettings?.network == NetworkType.XHTTP.type) {
@@ -553,6 +586,13 @@ object V2rayConfigManager {
         return true
     }
 
+    private fun moreOutbounds(
+        v2rayConfig: V2rayConfig,
+        isPlugin: Boolean,
+    ): Pair<Boolean, String> {
+        return Pair(false, "")
+    }
+
     fun getProxyOutbound(profileItem: ProfileItem): V2rayConfig.OutboundBean? {
         return when (profileItem.configType) {
             EConfigType.VMESS -> VmessFmt.toOutbound(profileItem)
@@ -561,6 +601,7 @@ object V2rayConfigManager {
             EConfigType.VLESS -> VlessFmt.toOutbound(profileItem)
             EConfigType.TROJAN -> TrojanFmt.toOutbound(profileItem)
             EConfigType.WIREGUARD -> WireguardFmt.toOutbound(profileItem)
+            EConfigType.HYSTERIA2 -> Hysteria2Fmt.toOutbound(profileItem)
         }
     }
 }

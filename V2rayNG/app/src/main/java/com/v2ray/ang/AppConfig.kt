@@ -110,6 +110,8 @@ object AppConfig {
     const val VLESS = "vless://"
     const val TROJAN = "trojan://"
     const val WIREGUARD = "wireguard://"
+    const val HYSTERIA2 = "hysteria2://"
+    const val HY2 = "hy2://"
 
     /** Give a good name to this, IDK */
     const val VPN = "VPN"

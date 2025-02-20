@@ -27,6 +27,7 @@ import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.handler.V2rayConfigManager
 import com.v2ray.ang.ui.MainActivity
 import com.v2ray.ang.util.MessageUtil
+import com.v2ray.ang.util.PluginUtil
 import com.v2ray.ang.util.Utils
 import go.Seq
 import io.reactivex.rxjava3.core.Observable
@@ -41,16 +42,13 @@ import libv2ray.V2RayPoint
 import libv2ray.V2RayVPNServiceSupportsSet
 
 object V2RayServiceManager {
-
     private const val NOTIFICATION_ID = 1
     private const val NOTIFICATION_PENDING_INTENT_CONTENT = 0
     private const val NOTIFICATION_PENDING_INTENT_STOP_V2RAY = 1
     private const val NOTIFICATION_PENDING_INTENT_RESTART_V2RAY = 2
     private const val NOTIFICATION_ICON_THRESHOLD = 3000
 
-    val v2rayPoint: V2RayPoint =
-        Libv2ray.newV2RayPoint(V2RayCallback(), Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1)
-
+    val v2rayPoint: V2RayPoint = Libv2ray.newV2RayPoint(V2RayCallback(), true)
     private val mMsgReceive = ReceiveMessageHandler()
 
     var serviceControl: SoftReference<ServiceControl>? = null
@@ -74,7 +72,9 @@ object V2RayServiceManager {
         if (v2rayPoint.isRunning) return
         val guid = MmkvManager.getSelectServer() ?: return
         val config = MmkvManager.decodeServerConfig(guid) ?: return
-        if (!Utils.isValidUrl(config.server) && !Utils.isIpAddress(config.server)) return
+        if (!Utils.isValidUrl(config.server) && !Utils.isIpAddress(config.server)) {
+            return
+        }
 
         if (MmkvManager.decodeSettingsBool(AppConfig.PREF_PROXY_SHARING) == true) {
             context.toast(R.string.toast_warning_pref_proxysharing_short)
@@ -172,6 +172,7 @@ object V2RayServiceManager {
         if (v2rayPoint.isRunning) {
             MessageUtil.sendMsg2UI(service, AppConfig.MSG_STATE_START_SUCCESS, "")
             showNotification()
+            PluginUtil.runPlugin(service, config, result.domainPort)
         } else {
             MessageUtil.sendMsg2UI(service, AppConfig.MSG_STATE_START_FAILURE, "")
             cancelNotification()
@@ -199,6 +200,7 @@ object V2RayServiceManager {
         } catch (e: Exception) {
             Log.d(ANG_PACKAGE, e.toString())
         }
+        PluginUtil.stopPlugin()
     }
 
     private class ReceiveMessageHandler : BroadcastReceiver() {
