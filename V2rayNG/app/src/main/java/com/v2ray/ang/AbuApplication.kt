@@ -9,9 +9,9 @@ import com.v2ray.ang.AppConfig.ANG_PACKAGE
 import com.v2ray.ang.handler.SettingsManager
 import com.v2ray.ang.util.Utils
 
-class AngApplication : Application() {
+class AbuApplication : Application() {
     companion object {
-        lateinit var application: AngApplication
+        lateinit var application: AbuApplication
     }
 
     override fun attachBaseContext(base: Context?) {

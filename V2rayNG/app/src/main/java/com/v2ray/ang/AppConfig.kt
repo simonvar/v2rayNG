@@ -1,7 +1,6 @@
 package com.v2ray.ang
 
 object AppConfig {
-
     /** The application's package name. */
     const val ANG_PACKAGE = BuildConfig.APPLICATION_ID
 
