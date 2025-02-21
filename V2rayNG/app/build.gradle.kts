@@ -55,7 +55,6 @@ android {
     productFlavors {
         create("fdroid") {
             dimension = "distribution"
-            applicationIdSuffix = ".fdroid"
             buildConfigField("String", "DISTRIBUTION", "\"F-Droid\"")
         }
         create("playstore") {
@@ -184,10 +183,6 @@ dependencies {
     // Reactive and Utility Libraries
     implementation(libs.rxjava)
     implementation(libs.rxandroid)
-
-    // Language and Processing Libraries
-    implementation(libs.language.base)
-    implementation(libs.language.json)
 
     // AndroidX Lifecycle and Architecture Components
     implementation(libs.lifecycle.viewmodel.ktx)

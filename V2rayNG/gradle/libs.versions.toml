@@ -68,8 +68,6 @@ gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 
 rxjava = { module = "io.reactivex.rxjava3:rxjava", version.ref = "rxjava" }
 rxandroid = { module = "io.reactivex.rxjava3:rxandroid", version.ref = "rxandroid" }
-language-base = { module = "com.blacksquircle.ui:language-base", version.ref = "editorkit" }
-language-json = { module = "com.blacksquircle.ui:language-json", version.ref = "editorkit" }
 
 # Depracated
 lifecycle-livedata-ktx = { module = "androidx.lifecycle:lifecycle-livedata-ktx", version.ref = "androidxLifecycle" }

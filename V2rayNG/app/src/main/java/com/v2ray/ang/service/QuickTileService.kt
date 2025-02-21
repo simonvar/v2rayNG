@@ -18,7 +18,6 @@ import java.lang.ref.SoftReference
 
 @TargetApi(Build.VERSION_CODES.N)
 class QuickTileService : TileService() {
-
     fun setState(state: Int) {
         if (state == Tile.STATE_INACTIVE) {
             qsTile?.state = Tile.STATE_INACTIVE
@@ -39,7 +38,12 @@ class QuickTileService : TileService() {
         setState(Tile.STATE_INACTIVE)
         mMsgReceive = ReceiveMessageHandler(this)
         val mFilter = IntentFilter(AppConfig.BROADCAST_ACTION_ACTIVITY)
-        ContextCompat.registerReceiver(applicationContext, mMsgReceive, mFilter, Utils.receiverFlags())
+        ContextCompat.registerReceiver(
+            applicationContext,
+            mMsgReceive,
+            mFilter,
+            Utils.receiverFlags(),
+        )
         MessageUtil.sendMsg2Service(this, AppConfig.MSG_REGISTER_CLIENT, "")
     }
 
@@ -52,7 +56,6 @@ class QuickTileService : TileService() {
         } catch (e: Exception) {
             e.printStackTrace()
         }
-
     }
 
     override fun onClick() {
@@ -70,9 +73,15 @@ class QuickTileService : TileService() {
 
     private var mMsgReceive: BroadcastReceiver? = null
 
-    private class ReceiveMessageHandler(context: QuickTileService) : BroadcastReceiver() {
+    private class ReceiveMessageHandler(
+        context: QuickTileService,
+    ) : BroadcastReceiver() {
         var mReference: SoftReference<QuickTileService> = SoftReference(context)
-        override fun onReceive(ctx: Context?, intent: Intent?) {
+
+        override fun onReceive(
+            ctx: Context?,
+            intent: Intent?,
+        ) {
             val context = mReference.get()
             when (intent?.getIntExtra("key", 0)) {
                 AppConfig.MSG_STATE_RUNNING -> {

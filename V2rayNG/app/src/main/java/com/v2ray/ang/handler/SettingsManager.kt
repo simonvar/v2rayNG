@@ -19,7 +19,6 @@ import java.io.FileOutputStream
 import kotlin.Int
 
 object SettingsManager {
-
     fun initRoutingRulesets(context: Context) {
         val exist = MmkvManager.decodeRoutingRulesets()
         if (exist.isNullOrEmpty()) {
@@ -60,18 +59,18 @@ object SettingsManager {
         return exist == true
     }
 
-    fun getSocksPort(): Int {
-        return parseInt(
+    fun getSocksPort(): Int =
+        parseInt(
             MmkvManager.decodeSettingsString(AppConfig.PREF_SOCKS_PORT),
             AppConfig.PORT_SOCKS.toInt(),
         )
-    }
 
-    fun getHttpPort(): Int {
-        return getSocksPort() + (if (Utils.isXray()) 0 else 1)
-    }
+    fun getHttpPort(): Int = getSocksPort() + (if (Utils.isXray()) 0 else 1)
 
-    fun initAssets(context: Context, assets: AssetManager) {
+    fun initAssets(
+        context: Context,
+        assets: AssetManager,
+    ) {
         val extFolder = Utils.userAssetPath(context)
 
         try {
