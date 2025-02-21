@@ -1,7 +1,11 @@
+import org.jetbrains.kotlin.compose.compiler.gradle.ComposeFeatureFlag
+
 plugins {
+    id("com.jaredsburrows.license")
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    id("com.jaredsburrows.license")
+    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.kotlin.compose)
 }
 
 android {
@@ -9,11 +13,11 @@ android {
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.abuvpn.ang"
+        applicationId = "com.abuvpn"
         minSdk = 28
         targetSdk = 35
-        versionCode = 631
-        versionName = "1.9.35"
+        versionCode = 1
+        versionName = "1.0"
 
         val abiFilterList = (properties["ABI_FILTERS"] as? String)?.split(';')
         splits {
@@ -67,7 +71,7 @@ android {
     }
 
     compileOptions {
-        isCoreLibraryDesugaringEnabled = true
+        isCoreLibraryDesugaringEnabled = false
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
@@ -93,7 +97,7 @@ android {
                 .map { it as com.android.build.gradle.internal.api.ApkVariantOutputImpl }
                 .forEach { output ->
                     val abi = output.getFilter("ABI") ?: "universal"
-                    output.outputFileName = "v2rayNG_${variant.versionName}-fdroid_$abi.apk"
+                    output.outputFileName = "abuNG_${variant.versionName}-fdroid_$abi.apk"
                     if (versionCodes.containsKey(abi)) {
                         output.versionCodeOverride =
                             (100 * variant.versionCode + versionCodes[abi]!!).plus(5000000)
@@ -121,7 +125,7 @@ android {
                             "universal"
                         }
 
-                    output.outputFileName = "v2rayNG_${variant.versionName}_$abi.apk"
+                    output.outputFileName = "abuNG_${variant.versionName}_$abi.apk"
                     if (versionCodes.containsKey(abi)) {
                         output.versionCodeOverride =
                             (1000000 * versionCodes[abi]!!).plus(variant.versionCode)
@@ -133,6 +137,7 @@ android {
     }
 
     buildFeatures {
+        compose = true
         viewBinding = true
         buildConfig = true
     }
@@ -144,6 +149,11 @@ android {
     }
 }
 
+composeCompiler {
+    featureFlags = setOf(ComposeFeatureFlag.StrongSkipping)
+    reportsDestination = layout.buildDirectory.dir("compose_compiler")
+}
+
 dependencies {
     // Core Libraries
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.aar", "*.jar"))))
@@ -152,12 +162,20 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.activity)
+    implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.recyclerview)
     implementation(libs.androidx.swiperefreshlayout)
 
     // UI
     implementation(libs.material)
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.compose.runtime)
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.ui.tooling.preview)
+    implementation(libs.androidx.compose.foundation)
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.material3)
 
     // Data and Storage Libraries
     implementation(libs.mmkv.static)
@@ -175,10 +193,12 @@ dependencies {
     implementation(libs.lifecycle.viewmodel.ktx)
     implementation(libs.lifecycle.livedata.ktx)
     implementation(libs.lifecycle.runtime.ktx)
+    implementation(libs.lifecycle.runtime.compose)
 
     // Background Task Libraries
     implementation(libs.work.runtime.ktx)
     implementation(libs.work.multiprocess)
 
-    coreLibraryDesugaring(libs.desugar.jdk.libs)
+    // Debug
+    debugImplementation(libs.androidx.compose.ui.tooling)
 }
