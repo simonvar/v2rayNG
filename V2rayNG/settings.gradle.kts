@@ -20,5 +20,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "v2rayNG"
+rootProject.name = "AbuNG"
 include(":app")

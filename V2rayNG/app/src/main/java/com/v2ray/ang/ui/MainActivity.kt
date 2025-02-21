@@ -30,11 +30,12 @@ import kotlinx.coroutines.withContext
 
 class MainActivity : BaseActivity() {
     private val binding by lazy { ActivityMainBinding.inflate(layoutInflater) }
-
     private val adapter by lazy { MainRecyclerAdapter(this) }
 
     private val requestVpnPermission =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult(),
+        ) {
             if (it.resultCode == RESULT_OK) {
                 startV2Ray()
             }

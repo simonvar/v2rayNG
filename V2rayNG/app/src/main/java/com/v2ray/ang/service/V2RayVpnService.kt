@@ -1,7 +1,6 @@
 package com.v2ray.ang.service
 
 import android.app.Service
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.ConnectivityManager
@@ -16,7 +15,6 @@ import android.os.Build
 import android.os.ParcelFileDescriptor
 import android.os.StrictMode
 import android.util.Log
-import androidx.annotation.RequiresApi
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.AppConfig.ANG_PACKAGE
 import com.v2ray.ang.AppConfig.LOOPBACK
@@ -24,16 +22,16 @@ import com.v2ray.ang.BuildConfig
 import com.v2ray.ang.R
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.handler.SettingsManager
-import com.v2ray.ang.util.MyContextWrapper
 import com.v2ray.ang.util.Utils
-import java.io.File
-import java.lang.ref.SoftReference
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.io.File
+import java.lang.ref.SoftReference
 
-class V2RayVpnService : VpnService(), ServiceControl {
-
+class V2RayVpnService :
+    VpnService(),
+    ServiceControl {
     companion object {
         private const val VPN_MTU = 1500
         private const val PRIVATE_VLAN4_CLIENT = "10.10.10.1"
@@ -61,9 +59,9 @@ class V2RayVpnService : VpnService(), ServiceControl {
      * Source:
      * https://android.googlesource.com/platform/frameworks/base/+/2df4c7d/services/core/java/com/android/server/ConnectivityService.java#887
      */
-    @delegate:RequiresApi(Build.VERSION_CODES.P)
     private val defaultNetworkRequest by lazy {
-        NetworkRequest.Builder()
+        NetworkRequest
+            .Builder()
             .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
             .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED)
             .build()
@@ -73,7 +71,6 @@ class V2RayVpnService : VpnService(), ServiceControl {
         getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
     }
 
-    @delegate:RequiresApi(Build.VERSION_CODES.P)
     private val defaultNetworkCallback by lazy {
         object : ConnectivityManager.NetworkCallback() {
             override fun onAvailable(network: Network) {
@@ -97,7 +94,11 @@ class V2RayVpnService : VpnService(), ServiceControl {
     override fun onCreate() {
         super.onCreate()
 
-        val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
+        val policy =
+            StrictMode.ThreadPolicy
+                .Builder()
+                .permitAll()
+                .build()
         StrictMode.setThreadPolicy(policy)
         V2RayServiceManager.serviceControl = SoftReference(this)
     }
@@ -157,8 +158,11 @@ class V2RayVpnService : VpnService(), ServiceControl {
             if (bypassApps) apps?.add(selfPackageName) else apps?.remove(selfPackageName)
             apps?.forEach {
                 try {
-                    if (bypassApps) builder.addDisallowedApplication(it)
-                    else builder.addAllowedApplication(it)
+                    if (bypassApps) {
+                        builder.addDisallowedApplication(it)
+                    } else {
+                        builder.addAllowedApplication(it)
+                    }
                 } catch (e: PackageManager.NameNotFoundException) {
                     Log.d(ANG_PACKAGE, "setup error : --${e.localizedMessage}")
                 }
@@ -186,7 +190,7 @@ class V2RayVpnService : VpnService(), ServiceControl {
             builder.setMetered(false)
             if (MmkvManager.decodeSettingsBool(AppConfig.PREF_APPEND_HTTP_PROXY)) {
                 builder.setHttpProxy(
-                    ProxyInfo.buildDirectProxy(LOOPBACK, SettingsManager.getHttpPort())
+                    ProxyInfo.buildDirectProxy(LOOPBACK, SettingsManager.getHttpPort()),
                 )
             }
         }
@@ -213,7 +217,7 @@ class V2RayVpnService : VpnService(), ServiceControl {
                 "--netif-netmask",
                 "255.255.255.252",
                 "--socks-server-addr",
-                "$LOOPBACK:${socksPort}",
+                "$LOOPBACK:$socksPort",
                 "--tunmtu",
                 VPN_MTU.toString(),
                 "--sock-path",
@@ -234,7 +238,7 @@ class V2RayVpnService : VpnService(), ServiceControl {
                     AppConfig.PORT_LOCAL_DNS.toInt(),
                 )
             cmd.add("--dnsgw")
-            cmd.add("$LOOPBACK:${localDnsPort}")
+            cmd.add("$LOOPBACK:$localDnsPort")
         }
         Log.d(packageName, cmd.toString())
 
@@ -243,15 +247,14 @@ class V2RayVpnService : VpnService(), ServiceControl {
             proBuilder.redirectErrorStream(true)
             process = proBuilder.directory(applicationContext.filesDir).start()
             Thread {
-                    Log.d(packageName, "$TUN2SOCKS check")
-                    process.waitFor()
-                    Log.d(packageName, "$TUN2SOCKS exited")
-                    if (isRunning) {
-                        Log.d(packageName, "$TUN2SOCKS restart")
-                        runTun2socks()
-                    }
+                Log.d(packageName, "$TUN2SOCKS check")
+                process.waitFor()
+                Log.d(packageName, "$TUN2SOCKS exited")
+                if (isRunning) {
+                    Log.d(packageName, "$TUN2SOCKS restart")
+                    runTun2socks()
                 }
-                .start()
+            }.start()
             Log.d(packageName, process.toString())
 
             sendFd()
@@ -267,39 +270,40 @@ class V2RayVpnService : VpnService(), ServiceControl {
 
         CoroutineScope(Dispatchers.IO).launch {
             var tries = 0
-            while (true) try {
-                Thread.sleep(50L shl tries)
-                Log.d(packageName, "sendFd tries: $tries")
-                LocalSocket().use { localSocket ->
-                    localSocket.connect(
-                        LocalSocketAddress(path, LocalSocketAddress.Namespace.FILESYSTEM)
-                    )
-                    localSocket.setFileDescriptorsForSend(arrayOf(fd))
-                    localSocket.outputStream.write(42)
+            while (true) {
+                try {
+                    Thread.sleep(50L shl tries)
+                    Log.d(packageName, "sendFd tries: $tries")
+                    LocalSocket().use { localSocket ->
+                        localSocket.connect(
+                            LocalSocketAddress(path, LocalSocketAddress.Namespace.FILESYSTEM),
+                        )
+                        localSocket.setFileDescriptorsForSend(arrayOf(fd))
+                        localSocket.outputStream.write(42)
+                    }
+                    break
+                } catch (e: Exception) {
+                    Log.d(packageName, e.toString())
+                    if (tries > 5) break
+                    tries += 1
                 }
-                break
-            } catch (e: Exception) {
-                Log.d(packageName, e.toString())
-                if (tries > 5) break
-                tries += 1
             }
         }
     }
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+    override fun onStartCommand(
+        intent: Intent?,
+        flags: Int,
+        startId: Int,
+    ): Int {
         V2RayServiceManager.startV2rayPoint()
         return START_STICKY
     }
 
     private fun stopV2Ray(isForced: Boolean = true) {
         isRunning = false
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            try {
-                connectivity.unregisterNetworkCallback(defaultNetworkCallback)
-            } catch (ignored: Exception) {
-                // ignored
-            }
-        }
+
+        runCatching { connectivity.unregisterNetworkCallback(defaultNetworkCallback) }
 
         try {
             Log.d(packageName, "tun2socks destroy")
@@ -313,24 +317,17 @@ class V2RayVpnService : VpnService(), ServiceControl {
         if (isForced) {
             // stopSelf has to be called ahead of mInterface.close(). otherwise v2ray core cannot be
             // stooped
-            // It's strage but true.
             // This can be verified by putting stopself() behind and call stopLoop and startLoop
             // in a row for several times. You will find that later created v2ray core report port
             // in use
             // which means the first v2ray core somehow failed to stop and release the port.
             stopSelf()
 
-            try {
-                mInterface.close()
-            } catch (ignored: Exception) {
-                // ignored
-            }
+            runCatching { mInterface.close() }
         }
     }
 
-    override fun getService(): Service {
-        return this
-    }
+    override fun getService(): Service = this
 
     override fun startService() {
         setup()
@@ -340,12 +337,5 @@ class V2RayVpnService : VpnService(), ServiceControl {
         stopV2Ray(true)
     }
 
-    override fun vpnProtect(socket: Int): Boolean {
-        return protect(socket)
-    }
-
-    override fun attachBaseContext(newBase: Context?) {
-        val context = newBase?.let { MyContextWrapper.wrap(newBase, Utils.getLocale()) }
-        super.attachBaseContext(context)
-    }
+    override fun vpnProtect(socket: Int): Boolean = protect(socket)
 }

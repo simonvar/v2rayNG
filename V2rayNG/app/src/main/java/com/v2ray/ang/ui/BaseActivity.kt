@@ -1,11 +1,9 @@
 package com.v2ray.ang.ui
 
-import android.content.Context
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
-import com.v2ray.ang.util.MyContextWrapper
 import com.v2ray.ang.util.Utils
 
 abstract class BaseActivity : AppCompatActivity() {
@@ -30,8 +28,4 @@ abstract class BaseActivity : AppCompatActivity() {
 
             else -> super.onOptionsItemSelected(item)
         }
-
-    override fun attachBaseContext(newBase: Context?) {
-        super.attachBaseContext(MyContextWrapper.wrap(newBase ?: return, Utils.getLocale()))
-    }
 }

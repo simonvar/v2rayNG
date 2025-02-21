@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.res.Configuration.UI_MODE_NIGHT_MASK
 import android.content.res.Configuration.UI_MODE_NIGHT_NO
 import android.os.Build
-import android.os.LocaleList
 import android.provider.Settings
 import android.util.Base64
 import android.util.Log
@@ -16,14 +15,12 @@ import androidx.core.content.ContextCompat
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.AppConfig.ANG_PACKAGE
 import com.v2ray.ang.R
-import com.v2ray.ang.dto.Language
 import com.v2ray.ang.extension.toast
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.service.V2RayServiceManager
 import java.io.IOException
 import java.net.ServerSocket
 import java.net.URLDecoder
-import java.util.Locale
 import java.util.UUID
 
 object Utils {
@@ -213,7 +210,6 @@ object Utils {
             url
         }
 
-    /** readTextFromAssets */
     fun readTextFromAssets(
         context: Context?,
         fileName: String,
@@ -262,31 +258,6 @@ object Utils {
             address
         }
     }
-
-    fun getLocale(): Locale {
-        val langCode =
-            MmkvManager.decodeSettingsString(AppConfig.PREF_LANGUAGE) ?: Language.AUTO.code
-        val language = Language.fromCode(langCode)
-
-        return when (language) {
-            Language.AUTO -> getSysLocale()
-            Language.ENGLISH -> Locale.ENGLISH
-            Language.CHINA -> Locale.CHINA
-            Language.TRADITIONAL_CHINESE -> Locale.TRADITIONAL_CHINESE
-            Language.VIETNAMESE -> Locale("vi")
-            Language.RUSSIAN -> Locale("ru")
-            Language.PERSIAN -> Locale("fa")
-            Language.BANGLA -> Locale("bn")
-            Language.BAKHTIARI -> Locale("bqi", "IR")
-        }
-    }
-
-    private fun getSysLocale(): Locale =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            LocaleList.getDefault()[0]
-        } else {
-            Locale.getDefault()
-        }
 
     fun fixIllegalUrl(str: String): String = str.replace(" ", "%20").replace("|", "%7C")
 
