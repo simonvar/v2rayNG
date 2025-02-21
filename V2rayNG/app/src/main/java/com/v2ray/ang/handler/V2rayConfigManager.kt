@@ -51,8 +51,10 @@ import com.v2ray.ang.util.JsonUtil
 import com.v2ray.ang.util.Utils
 
 object V2rayConfigManager {
-
-    fun getV2rayConfig(context: Context, guid: String): ConfigResult {
+    fun getV2rayConfig(
+        context: Context,
+        guid: String,
+    ): ConfigResult {
         try {
             val config = MmkvManager.decodeServerConfig(guid) ?: return ConfigResult(false)
             val result = getV2rayNonCustomConfig(context, config)
@@ -64,7 +66,10 @@ object V2rayConfigManager {
         }
     }
 
-    private fun getV2rayNonCustomConfig(context: Context, config: ProfileItem): ConfigResult {
+    private fun getV2rayNonCustomConfig(
+        context: Context,
+        config: ProfileItem,
+    ): ConfigResult {
         val result = ConfigResult(false)
 
         val address = config.server ?: return result
@@ -126,10 +131,16 @@ object V2rayConfigManager {
             v2rayConfig.inbounds[0].sniffing?.routeOnly =
                 MmkvManager.decodeSettingsBool(AppConfig.PREF_ROUTE_ONLY_ENABLED, false)
             if (!sniffAllTlsAndHttp) {
-                v2rayConfig.inbounds[0].sniffing?.destOverride?.clear()
+                v2rayConfig.inbounds[0]
+                    .sniffing
+                    ?.destOverride
+                    ?.clear()
             }
             if (fakedns) {
-                v2rayConfig.inbounds[0].sniffing?.destOverride?.add("fakedns")
+                v2rayConfig.inbounds[0]
+                    .sniffing
+                    ?.destOverride
+                    ?.add("fakedns")
             }
 
             if (Utils.isXray()) {
@@ -163,8 +174,8 @@ object V2rayConfigManager {
                                     V2rayConfig.OutboundBean.OutSettingsBean.ServersBean(
                                         address = LOOPBACK,
                                         port = socksPort,
-                                    )
-                                )
+                                    ),
+                                ),
                         ),
                 )
             if (v2rayConfig.outbounds.isNotEmpty()) {
@@ -192,7 +203,7 @@ object V2rayConfigManager {
     private fun fakedns(v2rayConfig: V2rayConfig) {
         if (
             MmkvManager.decodeSettingsBool(AppConfig.PREF_LOCAL_DNS_ENABLED) == true &&
-                MmkvManager.decodeSettingsBool(AppConfig.PREF_FAKE_DNS_ENABLED) == true
+            MmkvManager.decodeSettingsBool(AppConfig.PREF_FAKE_DNS_ENABLED) == true
         ) {
             v2rayConfig.fakedns = listOf(V2rayConfig.FakednsBean())
         }
@@ -200,7 +211,6 @@ object V2rayConfigManager {
 
     private fun routing(v2rayConfig: V2rayConfig): Boolean {
         try {
-
             v2rayConfig.routing.domainStrategy =
                 MmkvManager.decodeSettingsString(AppConfig.PREF_ROUTING_DOMAIN_STRATEGY)
                     ?: "IPIfNonMatch"
@@ -214,7 +224,10 @@ object V2rayConfigManager {
         return true
     }
 
-    private fun routingUserRule(item: RulesetItem?, v2rayConfig: V2rayConfig) {
+    private fun routingUserRule(
+        item: RulesetItem?,
+        v2rayConfig: V2rayConfig,
+    ) {
         try {
             if (item == null || !item.enabled) {
                 return
@@ -237,7 +250,7 @@ object V2rayConfigManager {
                 key.domain?.forEach {
                     if (
                         it != GEOSITE_PRIVATE &&
-                            (it.startsWith("geosite:") || it.startsWith("domain:"))
+                        (it.startsWith("geosite:") || it.startsWith("domain:"))
                     ) {
                         domain.add(it)
                     }
@@ -274,8 +287,11 @@ object V2rayConfigManager {
                 val dnsInboundSettings =
                     V2rayConfig.InboundBean.InSettingsBean(
                         address =
-                            if (Utils.isPureIpAddress(remoteDns.first())) remoteDns.first()
-                            else AppConfig.DNS_PROXY,
+                            if (Utils.isPureIpAddress(remoteDns.first())) {
+                                remoteDns.first()
+                            } else {
+                                AppConfig.DNS_PROXY
+                            },
                         port = 53,
                         network = "tcp,udp",
                     )
@@ -293,7 +309,7 @@ object V2rayConfigManager {
                         protocol = "dokodemo-door",
                         settings = dnsInboundSettings,
                         sniffing = null,
-                    )
+                    ),
                 )
             }
 
@@ -306,7 +322,7 @@ object V2rayConfigManager {
                         settings = null,
                         streamSettings = null,
                         mux = null,
-                    )
+                    ),
                 )
             }
 
@@ -340,7 +356,7 @@ object V2rayConfigManager {
                     V2rayConfig.DnsBean.ServersBean(
                         address = remoteDns.first(),
                         domains = proxyDomain,
-                    )
+                    ),
                 )
             }
 
@@ -356,7 +372,7 @@ object V2rayConfigManager {
                         domains = directDomain,
                         expectIPs = if (isCnRoutingMode) geoipCn else null,
                         skipFallback = true,
-                    )
+                    ),
                 )
             }
 
@@ -433,10 +449,10 @@ object V2rayConfigManager {
             val protocol = outbound.protocol
             if (
                 protocol.equals(EConfigType.SHADOWSOCKS.name, true) ||
-                    protocol.equals(EConfigType.SOCKS.name, true) ||
-                    protocol.equals(EConfigType.TROJAN.name, true) ||
-                    protocol.equals(EConfigType.WIREGUARD.name, true) ||
-                    protocol.equals(EConfigType.HYSTERIA2.name, true)
+                protocol.equals(EConfigType.SOCKS.name, true) ||
+                protocol.equals(EConfigType.TROJAN.name, true) ||
+                protocol.equals(EConfigType.WIREGUARD.name, true) ||
+                protocol.equals(EConfigType.HYSTERIA2.name, true)
             ) {
                 muxEnabled = false
             } else if (outbound.streamSettings?.network == NetworkType.XHTTP.type) {
@@ -446,19 +462,27 @@ object V2rayConfigManager {
             if (muxEnabled == true) {
                 outbound.mux?.enabled = true
                 outbound.mux?.concurrency =
-                    MmkvManager.decodeSettingsString(AppConfig.PREF_MUX_CONCURRENCY, "8")
+                    MmkvManager
+                        .decodeSettingsString(AppConfig.PREF_MUX_CONCURRENCY, "8")
                         .orEmpty()
                         .toInt()
                 outbound.mux?.xudpConcurrency =
-                    MmkvManager.decodeSettingsString(AppConfig.PREF_MUX_XUDP_CONCURRENCY, "16")
+                    MmkvManager
+                        .decodeSettingsString(AppConfig.PREF_MUX_XUDP_CONCURRENCY, "16")
                         .orEmpty()
                         .toInt()
                 outbound.mux?.xudpProxyUDP443 =
                     MmkvManager.decodeSettingsString(AppConfig.PREF_MUX_XUDP_QUIC, "reject")
                 if (
                     protocol.equals(EConfigType.VLESS.name, true) &&
-                        outbound.settings?.vnext?.first()?.users?.first()?.flow?.isNotEmpty() ==
-                            true
+                    outbound.settings
+                        ?.vnext
+                        ?.first()
+                        ?.users
+                        ?.first()
+                        ?.flow
+                        ?.isNotEmpty() ==
+                    true
                 ) {
                     outbound.mux?.concurrency = -1
                 }
@@ -482,28 +506,54 @@ object V2rayConfigManager {
 
             if (
                 outbound.streamSettings?.network == DEFAULT_NETWORK &&
-                    outbound.streamSettings?.tcpSettings?.header?.type == HEADER_TYPE_HTTP
+                outbound.streamSettings
+                    ?.tcpSettings
+                    ?.header
+                    ?.type == HEADER_TYPE_HTTP
             ) {
-                val path = outbound.streamSettings?.tcpSettings?.header?.request?.path
-                val host = outbound.streamSettings?.tcpSettings?.header?.request?.headers?.Host
+                val path =
+                    outbound.streamSettings
+                        ?.tcpSettings
+                        ?.header
+                        ?.request
+                        ?.path
+                val host =
+                    outbound.streamSettings
+                        ?.tcpSettings
+                        ?.header
+                        ?.request
+                        ?.headers
+                        ?.Host
 
                 val requestString: String by lazy {
                     """{"version":"1.1","method":"GET","headers":{"User-Agent":["Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.6478.122 Mobile Safari/537.36"],"Accept-Encoding":["gzip, deflate"],"Connection":["keep-alive"],"Pragma":"no-cache"}}"""
                 }
-                outbound.streamSettings?.tcpSettings?.header?.request =
+                outbound.streamSettings
+                    ?.tcpSettings
+                    ?.header
+                    ?.request =
                     JsonUtil.fromJson(
                         requestString,
                         V2rayConfig.OutboundBean.StreamSettingsBean.TcpSettingsBean.HeaderBean
-                                .RequestBean::class
+                            .RequestBean::class
                             .java,
                     )
-                outbound.streamSettings?.tcpSettings?.header?.request?.path =
+                outbound.streamSettings
+                    ?.tcpSettings
+                    ?.header
+                    ?.request
+                    ?.path =
                     if (path.isNullOrEmpty()) {
                         listOf("/")
                     } else {
                         path
                     }
-                outbound.streamSettings?.tcpSettings?.header?.request?.headers?.Host = host
+                outbound.streamSettings
+                    ?.tcpSettings
+                    ?.header
+                    ?.request
+                    ?.headers
+                    ?.Host = host
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -519,7 +569,7 @@ object V2rayConfigManager {
             }
             if (
                 v2rayConfig.outbounds[0].streamSettings?.security != AppConfig.TLS &&
-                    v2rayConfig.outbounds[0].streamSettings?.security != AppConfig.REALITY
+                v2rayConfig.outbounds[0].streamSettings?.security != AppConfig.REALITY
             ) {
                 return true
             }
@@ -535,12 +585,12 @@ object V2rayConfigManager {
                 MmkvManager.decodeSettingsString(AppConfig.PREF_FRAGMENT_PACKETS) ?: "tlshello"
             if (
                 v2rayConfig.outbounds[0].streamSettings?.security == AppConfig.REALITY &&
-                    packets == "tlshello"
+                packets == "tlshello"
             ) {
                 packets = "1-3"
             } else if (
                 v2rayConfig.outbounds[0].streamSettings?.security == AppConfig.TLS &&
-                    packets != "tlshello"
+                packets != "tlshello"
             ) {
                 packets = "tlshello"
             }
@@ -563,7 +613,7 @@ object V2rayConfigManager {
                                 type = "rand",
                                 packet = "10-20",
                                 delay = "10-16",
-                            )
+                            ),
                         ),
                 )
             fragmentOutbound.streamSettings =
@@ -572,7 +622,7 @@ object V2rayConfigManager {
                         V2rayConfig.OutboundBean.StreamSettingsBean.SockoptBean(
                             TcpNoDelay = true,
                             mark = 255,
-                        )
+                        ),
                 )
             v2rayConfig.outbounds.add(fragmentOutbound)
 
@@ -589,12 +639,10 @@ object V2rayConfigManager {
     private fun moreOutbounds(
         v2rayConfig: V2rayConfig,
         isPlugin: Boolean,
-    ): Pair<Boolean, String> {
-        return Pair(false, "")
-    }
+    ): Pair<Boolean, String> = Pair(false, "")
 
-    fun getProxyOutbound(profileItem: ProfileItem): V2rayConfig.OutboundBean? {
-        return when (profileItem.configType) {
+    fun getProxyOutbound(profileItem: ProfileItem): V2rayConfig.OutboundBean? =
+        when (profileItem.configType) {
             EConfigType.VMESS -> VmessFmt.toOutbound(profileItem)
             EConfigType.SHADOWSOCKS -> ShadowsocksFmt.toOutbound(profileItem)
             EConfigType.SOCKS -> SocksFmt.toOutbound(profileItem)
@@ -603,5 +651,4 @@ object V2rayConfigManager {
             EConfigType.WIREGUARD -> WireguardFmt.toOutbound(profileItem)
             EConfigType.HYSTERIA2 -> Hysteria2Fmt.toOutbound(profileItem)
         }
-    }
 }

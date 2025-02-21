@@ -11,7 +11,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.v2ray.ang.AngApplication
+import com.v2ray.ang.AbuApplication
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.AppConfig.ANG_PACKAGE
 import com.v2ray.ang.R
@@ -24,8 +24,9 @@ import com.v2ray.ang.util.Utils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class MainViewModel(application: Application) : AndroidViewModel(application) {
-
+class MainViewModel(
+    application: Application,
+) : AndroidViewModel(application) {
     private var serverList = MmkvManager.decodeServerList()
 
     val serversCache = mutableListOf<ServersCache>()
@@ -45,7 +46,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     override fun onCleared() {
-        getApplication<AngApplication>().unregisterReceiver(mMsgReceiver)
+        getApplication<AbuApplication>().unregisterReceiver(mMsgReceiver)
         Log.i(ANG_PACKAGE, "Main ViewModel is cleared")
         super.onCleared()
     }
@@ -81,13 +82,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun initAssets(assets: AssetManager) {
         viewModelScope.launch(Dispatchers.Default) {
-            SettingsManager.initAssets(getApplication<AngApplication>(), assets)
+            SettingsManager.initAssets(getApplication<AbuApplication>(), assets)
         }
     }
 
     private val mMsgReceiver =
         object : BroadcastReceiver() {
-            override fun onReceive(ctx: Context?, intent: Intent?) {
+            override fun onReceive(
+                ctx: Context?,
+                intent: Intent?,
+            ) {
                 when (intent?.getIntExtra("key", 0)) {
                     AppConfig.MSG_STATE_RUNNING -> {
                         isRunning.value = true
@@ -98,12 +102,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     }
 
                     AppConfig.MSG_STATE_START_SUCCESS -> {
-                        getApplication<AngApplication>().toast(R.string.toast_services_success)
+                        getApplication<AbuApplication>().toast(R.string.toast_services_success)
                         isRunning.value = true
                     }
 
                     AppConfig.MSG_STATE_START_FAILURE -> {
-                        getApplication<AngApplication>().toast(R.string.toast_services_failure)
+                        getApplication<AbuApplication>().toast(R.string.toast_services_failure)
                         isRunning.value = false
                     }
 

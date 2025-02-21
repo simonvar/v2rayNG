@@ -2,11 +2,11 @@ package com.v2ray.ang.extension
 
 import android.content.Context
 import android.widget.Toast
-import com.v2ray.ang.AngApplication
+import com.v2ray.ang.AbuApplication
 import java.net.URI
 
-val Context.v2RayApplication: AngApplication?
-    get() = applicationContext as? AngApplication
+val Context.v2RayApplication: AbuApplication?
+    get() = applicationContext as? AbuApplication
 
 fun Context.toast(message: Int) {
     Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
