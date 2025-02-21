@@ -1,22 +1,33 @@
 package com.v2ray.ang.util
 
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import com.v2ray.ang.AppConfig
 import java.io.Serializable
 
 object MessageUtil {
-
-    fun sendMsg2Service(ctx: Context, what: Int, content: Serializable) {
+    fun sendMsg2Service(
+        ctx: Context,
+        what: Int,
+        content: Serializable,
+    ) {
         sendMsg(ctx, AppConfig.BROADCAST_ACTION_SERVICE, what, content)
     }
 
-    fun sendMsg2UI(ctx: Context, what: Int, content: Serializable) {
+    fun sendMsg2UI(
+        ctx: Context,
+        what: Int,
+        content: Serializable,
+    ) {
         sendMsg(ctx, AppConfig.BROADCAST_ACTION_ACTIVITY, what, content)
     }
 
-    private fun sendMsg(ctx: Context, action: String, what: Int, content: Serializable) {
+    private fun sendMsg(
+        ctx: Context,
+        action: String,
+        what: Int,
+        content: Serializable,
+    ) {
         try {
             val intent = Intent()
             intent.action = action

@@ -9,7 +9,6 @@ import android.view.MenuItem
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.lifecycle.lifecycleScope
@@ -30,7 +29,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class MainActivity : BaseActivity() {
-
     private val binding by lazy { ActivityMainBinding.inflate(layoutInflater) }
 
     private val adapter by lazy { MainRecyclerAdapter(this) }
@@ -68,18 +66,6 @@ class MainActivity : BaseActivity() {
         binding.recyclerView.setHasFixedSize(true)
         binding.recyclerView.layoutManager = LinearLayoutManager(this)
         binding.recyclerView.adapter = adapter
-
-        val toggle =
-            ActionBarDrawerToggle(
-                this,
-                binding.drawerLayout,
-                binding.toolbar,
-                R.string.navigation_drawer_open,
-                R.string.navigation_drawer_close,
-            )
-        binding.drawerLayout.addDrawerListener(toggle)
-        toggle.syncState()
-
         setupViewModel()
 
         onBackPressedDispatcher.addCallback(
@@ -177,6 +163,7 @@ class MainActivity : BaseActivity() {
                             toast(getString(R.string.title_import_config_count, count))
                             mainViewModel.reloadServerList()
                         }
+
                         else -> toast(R.string.toast_failure)
                     }
                     binding.pbWaiting.hide()
@@ -191,7 +178,10 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
+    override fun onKeyDown(
+        keyCode: Int,
+        event: KeyEvent,
+    ): Boolean {
         if (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_BUTTON_B) {
             moveTaskToBack(false)
             return true

@@ -1,7 +1,7 @@
 package com.v2ray.ang
 
+import android.app.Application
 import android.content.Context
-import androidx.multidex.MultiDexApplication
 import androidx.work.Configuration
 import androidx.work.WorkManager
 import com.tencent.mmkv.MMKV
@@ -9,8 +9,7 @@ import com.v2ray.ang.AppConfig.ANG_PACKAGE
 import com.v2ray.ang.handler.SettingsManager
 import com.v2ray.ang.util.Utils
 
-class AngApplication : MultiDexApplication() {
-
+class AngApplication : Application() {
     companion object {
         lateinit var application: AngApplication
     }

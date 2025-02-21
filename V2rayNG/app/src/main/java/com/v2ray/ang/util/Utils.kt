@@ -2,10 +2,8 @@ package com.v2ray.ang.util
 
 import android.content.ClipboardManager
 import android.content.Context
-import android.content.Intent
 import android.content.res.Configuration.UI_MODE_NIGHT_MASK
 import android.content.res.Configuration.UI_MODE_NIGHT_NO
-import android.net.Uri
 import android.os.Build
 import android.os.LocaleList
 import android.provider.Settings
@@ -23,33 +21,33 @@ import com.v2ray.ang.extension.toast
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.service.V2RayServiceManager
 import java.io.IOException
-import java.net.*
-import java.util.*
+import java.net.ServerSocket
+import java.net.URLDecoder
+import java.util.Locale
+import java.util.UUID
 
 object Utils {
+    fun parseInt(str: String): Int = parseInt(str, 0)
 
-    fun parseInt(str: String): Int {
-        return parseInt(str, 0)
-    }
+    fun parseInt(
+        str: String?,
+        default: Int,
+    ): Int = str?.toIntOrNull() ?: default
 
-    fun parseInt(str: String?, default: Int): Int {
-        return str?.toIntOrNull() ?: default
-    }
-
-    fun getClipboard(context: Context): String {
-        return try {
+    fun getClipboard(context: Context): String =
+        try {
             val cmb = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-            cmb.primaryClip?.getItemAt(0)?.text.toString()
+            cmb.primaryClip
+                ?.getItemAt(0)
+                ?.text
+                .toString()
         } catch (e: Exception) {
             e.printStackTrace()
             ""
         }
-    }
 
     /** base64 decode */
-    fun decode(text: String?): String {
-        return tryDecodeBase64(text) ?: text?.trimEnd('=')?.let { tryDecodeBase64(it) }.orEmpty()
-    }
+    fun decode(text: String?): String = tryDecodeBase64(text) ?: text?.trimEnd('=')?.let { tryDecodeBase64(it) }.orEmpty()
 
     fun tryDecodeBase64(text: String?): String? {
         try {
@@ -136,14 +134,12 @@ object Utils {
         }
     }
 
-    fun isPureIpAddress(value: String): Boolean {
-        return isIpv4Address(value) || isIpv6Address(value)
-    }
+    fun isPureIpAddress(value: String): Boolean = isIpv4Address(value) || isIpv6Address(value)
 
     fun isIpv4Address(value: String): Boolean {
         val regV4 =
             Regex(
-                "^([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\\.([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\\.([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\\.([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])$"
+                "^([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\\.([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\\.([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\\.([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])$",
             )
         return regV4.matches(value)
     }
@@ -156,17 +152,16 @@ object Utils {
         }
         val regV6 =
             Regex(
-                "^((?:[0-9A-Fa-f]{1,4}))?((?::[0-9A-Fa-f]{1,4}))*::((?:[0-9A-Fa-f]{1,4}))?((?::[0-9A-Fa-f]{1,4}))*|((?:[0-9A-Fa-f]{1,4}))((?::[0-9A-Fa-f]{1,4})){7}$"
+                "^((?:[0-9A-Fa-f]{1,4}))?((?::[0-9A-Fa-f]{1,4}))*::((?:[0-9A-Fa-f]{1,4}))?((?::[0-9A-Fa-f]{1,4}))*|((?:[0-9A-Fa-f]{1,4}))((?::[0-9A-Fa-f]{1,4})){7}$",
             )
         return regV6.matches(addr)
     }
 
-    private fun isCoreDNSAddress(s: String): Boolean {
-        return s.startsWith("https") ||
+    private fun isCoreDNSAddress(s: String): Boolean =
+        s.startsWith("https") ||
             s.startsWith("tcp") ||
             s.startsWith("quic") ||
             s == "localhost"
-    }
 
     /** is valid url */
     fun isValidUrl(value: String?): Boolean {
@@ -176,8 +171,8 @@ object Utils {
             }
             if (
                 Patterns.WEB_URL.matcher(value).matches() ||
-                    Patterns.DOMAIN_NAME.matcher(value).matches() ||
-                    URLUtil.isValidUrl(value)
+                Patterns.DOMAIN_NAME.matcher(value).matches() ||
+                URLUtil.isValidUrl(value)
             ) {
                 return true
             }
@@ -197,42 +192,40 @@ object Utils {
         return true
     }
 
-    /** stopVService */
     fun stopVService(context: Context) {
         context.toast(R.string.toast_services_stop)
         MessageUtil.sendMsg2Service(context, AppConfig.MSG_STATE_STOP, "")
     }
 
-    fun openUri(context: Context, uriString: String) {
-        val uri = Uri.parse(uriString)
-        context.startActivity(Intent(Intent.ACTION_VIEW, uri))
-    }
-
-    /** uuid */
-    fun getUuid(): String {
-        return try {
+    fun getUuid(): String =
+        try {
             UUID.randomUUID().toString().replace("-", "")
         } catch (e: Exception) {
             e.printStackTrace()
             ""
         }
-    }
 
-    fun urlDecode(url: String): String {
-        return try {
+    fun urlDecode(url: String): String =
+        try {
             URLDecoder.decode(url, Charsets.UTF_8.toString())
         } catch (e: Exception) {
             e.printStackTrace()
             url
         }
-    }
 
     /** readTextFromAssets */
-    fun readTextFromAssets(context: Context?, fileName: String): String {
+    fun readTextFromAssets(
+        context: Context?,
+        fileName: String,
+    ): String {
         if (context == null) {
             return ""
         }
-        val content = context.assets.open(fileName).bufferedReader().use { it.readText() }
+        val content =
+            context.assets
+                .open(fileName)
+                .bufferedReader()
+                .use { it.readText() }
         return content
     }
 
@@ -249,9 +242,7 @@ object Utils {
         return Base64.encodeToString(androidId.copyOf(32), Base64.NO_PADDING.or(Base64.URL_SAFE))
     }
 
-    fun getDarkModeStatus(context: Context): Boolean {
-        return context.resources.configuration.uiMode and UI_MODE_NIGHT_MASK != UI_MODE_NIGHT_NO
-    }
+    fun getDarkModeStatus(context: Context): Boolean = context.resources.configuration.uiMode and UI_MODE_NIGHT_MASK != UI_MODE_NIGHT_NO
 
     fun setNightMode() {
         when (MmkvManager.decodeSettingsString(AppConfig.PREF_UI_MODE_NIGHT, "0")) {
@@ -297,18 +288,15 @@ object Utils {
             Locale.getDefault()
         }
 
-    fun fixIllegalUrl(str: String): String {
-        return str.replace(" ", "%20").replace("|", "%7C")
-    }
+    fun fixIllegalUrl(str: String): String = str.replace(" ", "%20").replace("|", "%7C")
 
-    fun getDelayTestUrl(second: Boolean = false): String {
-        return if (second) {
+    fun getDelayTestUrl(second: Boolean = false): String =
+        if (second) {
             AppConfig.DelayTestUrl2
         } else {
             MmkvManager.decodeSettingsString(AppConfig.PREF_DELAY_TEST_URL)
                 ?: AppConfig.DelayTestUrl
         }
-    }
 
     fun receiverFlags(): Int =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {

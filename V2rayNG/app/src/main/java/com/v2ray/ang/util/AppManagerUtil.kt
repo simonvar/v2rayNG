@@ -4,10 +4,8 @@ import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import com.v2ray.ang.dto.AppInfo
-import io.reactivex.rxjava3.core.Observable
 
 object AppManagerUtil {
-
     private fun loadNetworkAppList(ctx: Context): ArrayList<AppInfo> {
         val packageManager = ctx.packageManager
         val packages = packageManager.getInstalledPackages(PackageManager.GET_PERMISSIONS)

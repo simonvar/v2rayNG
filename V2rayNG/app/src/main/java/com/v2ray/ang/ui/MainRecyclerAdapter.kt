@@ -21,9 +21,9 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
 import java.util.concurrent.TimeUnit
 
-class MainRecyclerAdapter(val activity: MainActivity) :
-    RecyclerView.Adapter<MainRecyclerAdapter.BaseViewHolder>() {
-
+class MainRecyclerAdapter(
+    val activity: MainActivity,
+) : RecyclerView.Adapter<MainRecyclerAdapter.BaseViewHolder>() {
     companion object {
         private const val VIEW_TYPE_ITEM = 1
         private const val VIEW_TYPE_FOOTER = 2
@@ -35,7 +35,10 @@ class MainRecyclerAdapter(val activity: MainActivity) :
     override fun getItemCount() = mActivity.mainViewModel.serversCache.size + 1
 
     @SuppressLint("CheckResult")
-    override fun onBindViewHolder(holder: BaseViewHolder, position: Int) {
+    override fun onBindViewHolder(
+        holder: BaseViewHolder,
+        position: Int,
+    ) {
         if (holder is MainViewHolder) {
             val guid = mActivity.mainViewModel.serversCache[position].guid
             val profile = mActivity.mainViewModel.serversCache[position].profile
@@ -53,28 +56,28 @@ class MainRecyclerAdapter(val activity: MainActivity) :
 
             val strState =
                 "${
-                profile.server?.let {
-                    if (it.contains(":"))
-                        it.split(":").take(2).joinToString(":", postfix = ":***")
-                    else
-                        it.split('.').dropLast(1).joinToString(".", postfix = ".***")
-                }
-            } : ${profile.serverPort}"
+                    profile.server?.let {
+                        if (it.contains(":")) {
+                            it.split(":").take(2).joinToString(":", postfix = ":***")
+                        } else {
+                            it.split('.').dropLast(1).joinToString(".", postfix = ".***")
+                        }
+                    }
+                } : ${profile.serverPort}"
 
             holder.itemMainBinding.tvStatistics.text = strState
 
             holder.itemMainBinding.layoutRemove.setOnClickListener {
                 if (guid != MmkvManager.getSelectServer()) {
                     if (MmkvManager.decodeSettingsBool(AppConfig.PREF_CONFIRM_REMOVE) == true) {
-                        AlertDialog.Builder(mActivity)
+                        AlertDialog
+                            .Builder(mActivity)
                             .setMessage(R.string.del_config_comfirm)
                             .setPositiveButton(android.R.string.ok) { _, _ ->
                                 removeServer(guid, position)
-                            }
-                            .setNegativeButton(android.R.string.cancel) { _, _ ->
+                            }.setNegativeButton(android.R.string.cancel) { _, _ ->
                                 // do noting
-                            }
-                            .show()
+                            }.show()
                     } else {
                         removeServer(guid, position)
                     }
@@ -93,7 +96,8 @@ class MainRecyclerAdapter(val activity: MainActivity) :
                     notifyItemChanged(mActivity.mainViewModel.getPosition(guid))
                     if (isRunning) {
                         Utils.stopVService(mActivity)
-                        Observable.timer(500, TimeUnit.MILLISECONDS)
+                        Observable
+                            .timer(500, TimeUnit.MILLISECONDS)
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe { V2RayServiceManager.startV2Ray(mActivity) }
                     }
@@ -107,21 +111,27 @@ class MainRecyclerAdapter(val activity: MainActivity) :
         }
     }
 
-    private fun removeServer(guid: String, position: Int) {
+    private fun removeServer(
+        guid: String,
+        position: Int,
+    ) {
         mActivity.mainViewModel.removeServer(guid)
         notifyItemRemoved(position)
         notifyItemRangeChanged(position, mActivity.mainViewModel.serversCache.size)
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder {
-        return when (viewType) {
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int,
+    ): BaseViewHolder =
+        when (viewType) {
             VIEW_TYPE_ITEM ->
                 MainViewHolder(
                     ItemRecyclerMainBinding.inflate(
                         LayoutInflater.from(parent.context),
                         parent,
                         false,
-                    )
+                    ),
                 )
 
             else ->
@@ -130,20 +140,20 @@ class MainRecyclerAdapter(val activity: MainActivity) :
                         LayoutInflater.from(parent.context),
                         parent,
                         false,
-                    )
+                    ),
                 )
         }
-    }
 
-    override fun getItemViewType(position: Int): Int {
-        return if (position == mActivity.mainViewModel.serversCache.size) {
+    override fun getItemViewType(position: Int): Int =
+        if (position == mActivity.mainViewModel.serversCache.size) {
             VIEW_TYPE_FOOTER
         } else {
             VIEW_TYPE_ITEM
         }
-    }
 
-    open class BaseViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    open class BaseViewHolder(
+        itemView: View,
+    ) : RecyclerView.ViewHolder(itemView) {
         fun onItemSelected() {
             itemView.setBackgroundColor(Color.LTGRAY)
         }
@@ -153,9 +163,11 @@ class MainRecyclerAdapter(val activity: MainActivity) :
         }
     }
 
-    class MainViewHolder(val itemMainBinding: ItemRecyclerMainBinding) :
-        BaseViewHolder(itemMainBinding.root)
+    class MainViewHolder(
+        val itemMainBinding: ItemRecyclerMainBinding,
+    ) : BaseViewHolder(itemMainBinding.root)
 
-    class FooterViewHolder(val itemFooterBinding: ItemRecyclerFooterBinding) :
-        BaseViewHolder(itemFooterBinding.root)
+    class FooterViewHolder(
+        val itemFooterBinding: ItemRecyclerFooterBinding,
+    ) : BaseViewHolder(itemFooterBinding.root)
 }

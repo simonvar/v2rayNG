@@ -11,12 +11,15 @@ import com.v2ray.ang.service.ProcessService
 import java.io.File
 
 object PluginUtil {
-
     private const val HYSTERIA2 = "libhysteria2.so"
     private const val TAG = ANG_PACKAGE
     private val procService: ProcessService by lazy { ProcessService() }
 
-    fun runPlugin(context: Context, config: ProfileItem?, domainPort: String?) {
+    fun runPlugin(
+        context: Context,
+        config: ProfileItem?,
+        domainPort: String?,
+    ) {
         Log.d(TAG, "runPlugin")
 
         if (config?.configType?.equals(EConfigType.HYSTERIA2) == true) {
@@ -31,7 +34,11 @@ object PluginUtil {
         stopHy2()
     }
 
-    private fun genConfigHy2(context: Context, config: ProfileItem, domainPort: String?): File? {
+    private fun genConfigHy2(
+        context: Context,
+        config: ProfileItem,
+        domainPort: String?,
+    ): File? {
         Log.d(TAG, "runPlugin $HYSTERIA2")
 
         val socksPort =
@@ -50,8 +57,11 @@ object PluginUtil {
         return configFile
     }
 
-    private fun genCmdHy2(context: Context, configFile: File): MutableList<String> {
-        return mutableListOf(
+    private fun genCmdHy2(
+        context: Context,
+        configFile: File,
+    ): MutableList<String> =
+        mutableListOf(
             File(context.applicationInfo.nativeLibraryDir, HYSTERIA2).absolutePath,
             "--disable-update-check",
             "--config",
@@ -60,7 +70,6 @@ object PluginUtil {
             "warn",
             "client",
         )
-    }
 
     private fun stopHy2() {
         try {

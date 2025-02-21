@@ -4,15 +4,16 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.content.res.Configuration
 import android.content.res.Resources
-import android.os.Build
-import androidx.annotation.RequiresApi
 import java.util.Locale
 
-open class MyContextWrapper(base: Context?) : ContextWrapper(base) {
-
+open class MyContextWrapper(
+    base: Context?,
+) : ContextWrapper(base) {
     companion object {
-
-        fun wrap(context: Context, newLocale: Locale?): ContextWrapper {
+        fun wrap(
+            context: Context,
+            newLocale: Locale?,
+        ): ContextWrapper {
             var mContext = context
             val res: Resources = mContext.resources
             val configuration: Configuration = res.configuration
