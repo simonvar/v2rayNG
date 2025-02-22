@@ -51,18 +51,6 @@ android {
         }
     }
 
-    flavorDimensions.add("distribution")
-    productFlavors {
-        create("fdroid") {
-            dimension = "distribution"
-            buildConfigField("String", "DISTRIBUTION", "\"F-Droid\"")
-        }
-        create("playstore") {
-            dimension = "distribution"
-            buildConfigField("String", "DISTRIBUTION", "\"Play Store\"")
-        }
-    }
-
     sourceSets {
         getByName("main") {
             jniLibs.srcDirs("libs")
@@ -81,64 +69,41 @@ android {
 
     applicationVariants.all {
         val variant = this
-        val isFdroid = variant.productFlavors.any { it.name == "fdroid" }
-        if (isFdroid) {
-            val versionCodes =
-                mapOf(
-                    "armeabi-v7a" to 2,
-                    "arm64-v8a" to 1,
-                    "x86" to 4,
-                    "x86_64" to 3,
-                    "universal" to 0,
-                )
 
-            variant.outputs
-                .map { it as com.android.build.gradle.internal.api.ApkVariantOutputImpl }
-                .forEach { output ->
-                    val abi = output.getFilter("ABI") ?: "universal"
-                    output.outputFileName = "abuNG_${variant.versionName}-fdroid_$abi.apk"
-                    if (versionCodes.containsKey(abi)) {
-                        output.versionCodeOverride =
-                            (100 * variant.versionCode + versionCodes[abi]!!).plus(5000000)
+        val versionCodes =
+            mapOf(
+                "armeabi-v7a" to 4,
+                "arm64-v8a" to 4,
+                "x86" to 4,
+                "x86_64" to 4,
+                "universal" to 4,
+            )
+
+        variant.outputs
+            .map { it as com.android.build.gradle.internal.api.ApkVariantOutputImpl }
+            .forEach { output ->
+                val abi =
+                    if (output.getFilter("ABI") != null) {
+                        output.getFilter("ABI")
                     } else {
-                        return@forEach
+                        "universal"
                     }
-                }
-        } else {
-            val versionCodes =
-                mapOf(
-                    "armeabi-v7a" to 4,
-                    "arm64-v8a" to 4,
-                    "x86" to 4,
-                    "x86_64" to 4,
-                    "universal" to 4,
-                )
 
-            variant.outputs
-                .map { it as com.android.build.gradle.internal.api.ApkVariantOutputImpl }
-                .forEach { output ->
-                    val abi =
-                        if (output.getFilter("ABI") != null) {
-                            output.getFilter("ABI")
-                        } else {
-                            "universal"
-                        }
-
-                    output.outputFileName = "abuNG_${variant.versionName}_$abi.apk"
-                    if (versionCodes.containsKey(abi)) {
-                        output.versionCodeOverride =
-                            (1000000 * versionCodes[abi]!!).plus(variant.versionCode)
-                    } else {
-                        return@forEach
-                    }
+                output.outputFileName = "abuNG_${variant.versionName}_$abi.apk"
+                if (versionCodes.containsKey(abi)) {
+                    output.versionCodeOverride =
+                        (1000000 * versionCodes[abi]!!).plus(variant.versionCode)
+                } else {
+                    return@forEach
                 }
-        }
+            }
     }
 
     buildFeatures {
         compose = true
         viewBinding = true
         buildConfig = true
+        resValues = true
     }
 
     packaging {
@@ -157,14 +122,17 @@ dependencies {
     // Core Libraries
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.aar", "*.jar"))))
 
-    // AndroidX Core Libraries
+    // AndroidX Core
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.activity.compose)
-    implementation(libs.androidx.constraintlayout)
-    implementation(libs.recyclerview)
-    implementation(libs.androidx.swiperefreshlayout)
+    implementation(libs.androidx.navigation.compose)
+
+    // AndroidX Lifecycle
+    implementation(libs.lifecycle.viewmodel.ktx)
+    implementation(libs.lifecycle.runtime.ktx)
+    implementation(libs.lifecycle.runtime.compose)
 
     // UI
     implementation(libs.material)
@@ -174,26 +142,26 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.compose.material3)
-    implementation(libs.androidx.compose.material3)
 
-    // Data and Storage Libraries
-    implementation(libs.mmkv.static)
-    implementation(libs.gson)
+    // KotlinX
+    implementation(libs.kotlinx.serialization.json)
 
-    // Reactive and Utility Libraries
-    implementation(libs.rxjava)
-    implementation(libs.rxandroid)
+    // Data
+    implementation(libs.mmkv)
 
-    // AndroidX Lifecycle and Architecture Components
-    implementation(libs.lifecycle.viewmodel.ktx)
-    implementation(libs.lifecycle.livedata.ktx)
-    implementation(libs.lifecycle.runtime.ktx)
-    implementation(libs.lifecycle.runtime.compose)
-
-    // Background Task Libraries
+    // Worker
     implementation(libs.work.runtime.ktx)
     implementation(libs.work.multiprocess)
 
     // Debug
     debugImplementation(libs.androidx.compose.ui.tooling)
+
+    // Deprecated
+    implementation(libs.androidx.constraintlayout)
+    implementation(libs.recyclerview)
+    implementation(libs.androidx.swiperefreshlayout)
+    implementation(libs.gson)
+    implementation(libs.lifecycle.livedata.ktx)
+    implementation(libs.rxjava)
+    implementation(libs.rxandroid)
 }

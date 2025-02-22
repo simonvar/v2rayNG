@@ -9,7 +9,6 @@ import com.v2ray.ang.dto.ProfileItem
 import com.v2ray.ang.dto.V2rayConfig.OutboundBean
 import com.v2ray.ang.dto.VmessQRCode
 import com.v2ray.ang.extension.idnHost
-import com.v2ray.ang.extension.isNotNullEmpty
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.util.JsonUtil
 import com.v2ray.ang.util.Utils
@@ -17,7 +16,6 @@ import java.net.URI
 import kotlin.text.orEmpty
 
 object VmessFmt : FmtBase() {
-
     fun parse(str: String): ProfileItem? {
         if (str.indexOf('?') > 0 && str.indexOf('&') > 0) {
             return parseVmessStd(str)
@@ -34,10 +32,10 @@ object VmessFmt : FmtBase() {
         }
         val vmessQRCode = JsonUtil.fromJson(result, VmessQRCode::class.java)
         // Although VmessQRCode fields are non null, looks like Gson may still create null fields
-        if (TextUtils.isEmpty(vmessQRCode.add)
-            || TextUtils.isEmpty(vmessQRCode.port)
-            || TextUtils.isEmpty(vmessQRCode.id)
-            || TextUtils.isEmpty(vmessQRCode.net)
+        if (TextUtils.isEmpty(vmessQRCode.add) ||
+            TextUtils.isEmpty(vmessQRCode.port) ||
+            TextUtils.isEmpty(vmessQRCode.id) ||
+            TextUtils.isEmpty(vmessQRCode.net)
         ) {
             Log.d(AppConfig.ANG_PACKAGE, "R.string.toast_incorrect_protocol")
             return null
@@ -47,9 +45,10 @@ object VmessFmt : FmtBase() {
         config.server = vmessQRCode.add
         config.serverPort = vmessQRCode.port
         config.password = vmessQRCode.id
-        config.method = if (TextUtils.isEmpty(vmessQRCode.scy)) AppConfig.DEFAULT_SECURITY else vmessQRCode.scy
+        config.method =
+            if (TextUtils.isEmpty(vmessQRCode.scy)) AppConfig.DEFAULT_SECURITY else vmessQRCode.scy
 
-        config.network = vmessQRCode.net ?: NetworkType.TCP.type
+        config.network = vmessQRCode.net
         config.headerType = vmessQRCode.type
         config.host = vmessQRCode.host
         config.path = vmessQRCode.path
@@ -64,6 +63,7 @@ object VmessFmt : FmtBase() {
                 config.serviceName = vmessQRCode.path
                 config.authority = vmessQRCode.host
             }
+
             else -> {}
         }
 
@@ -95,7 +95,6 @@ object VmessFmt : FmtBase() {
         return config
     }
 
-
     fun toOutbound(profileItem: ProfileItem): OutboundBean? {
         val outboundBean = OutboundBean.create(EConfigType.VMESS)
 
@@ -106,16 +105,17 @@ object VmessFmt : FmtBase() {
             vnext.users[0].security = profileItem.method
         }
 
-        val sni = outboundBean?.streamSettings?.populateTransportSettings(
-            profileItem.network.orEmpty(),
-            profileItem.headerType,
-            profileItem.host,
-            profileItem.path,
-            profileItem.seed,
-            profileItem.mode,
-            profileItem.serviceName,
-            profileItem.authority,
-        )
+        val sni =
+            outboundBean?.streamSettings?.populateTransportSettings(
+                profileItem.network.orEmpty(),
+                profileItem.headerType,
+                profileItem.host,
+                profileItem.path,
+                profileItem.seed,
+                profileItem.mode,
+                profileItem.serviceName,
+                profileItem.authority,
+            )
 
         outboundBean?.streamSettings?.populateTlsSettings(
             profileItem.security.orEmpty(),
@@ -125,10 +125,9 @@ object VmessFmt : FmtBase() {
             profileItem.alpn,
             null,
             null,
-            null
+            null,
         )
 
         return outboundBean
     }
-
 }

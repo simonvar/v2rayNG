@@ -27,51 +27,67 @@ object Hysteria2Fmt : FmtBase() {
             val queryParam = getQueryParam(uri)
 
             config.security = queryParam["security"] ?: AppConfig.TLS
-            config.insecure = if (queryParam["insecure"].isNullOrEmpty()) {
-                allowInsecure
-            } else {
-                queryParam["insecure"].orEmpty() == "1"
-            }
+            config.insecure =
+                if (queryParam["insecure"].isNullOrEmpty()) {
+                    allowInsecure
+                } else {
+                    queryParam["insecure"].orEmpty() == "1"
+                }
             config.sni = queryParam["sni"]
             config.alpn = queryParam["alpn"]
 
             config.obfsPassword = queryParam["obfs-password"]
             config.portHopping = queryParam["mport"]
             config.pinSHA256 = queryParam["pinSHA256"]
-
         }
 
         return config
     }
 
-    fun toNativeConfig(config: ProfileItem, socksPort: Int): Hysteria2Bean? {
-        val obfs = if (config.obfsPassword.isNullOrEmpty()) null else
+    fun toNativeConfig(
+        config: ProfileItem,
+        socksPort: Int,
+    ): Hysteria2Bean? {
+        val obfs = if (config.obfsPassword.isNullOrEmpty()) {
+            null
+        } else {
             Hysteria2Bean.ObfsBean(
                 type = "salamander",
-                salamander = Hysteria2Bean.ObfsBean.SalamanderBean(
-                    password = config.obfsPassword
-                )
+                salamander =
+                    Hysteria2Bean.ObfsBean.SalamanderBean(
+                        password = config.obfsPassword,
+                    ),
             )
+        }
 
-        val transport = if (config.portHopping.isNullOrEmpty()) null else
+        val transport = if (config.portHopping.isNullOrEmpty()) {
+            null
+        } else {
             Hysteria2Bean.TransportBean(
                 type = "udp",
-                udp = Hysteria2Bean.TransportBean.TransportUdpBean(
-                    hopInterval = (config.portHoppingInterval ?: "30") + "s"
-                )
+                udp =
+                    Hysteria2Bean.TransportBean.TransportUdpBean(
+                        hopInterval = (config.portHoppingInterval ?: "30") + "s",
+                    ),
             )
+        }
 
-        val bandwidth = if (config.bandwidthDown.isNullOrEmpty() || config.bandwidthUp.isNullOrEmpty()) null else
-            Hysteria2Bean.BandwidthBean(
-                down = config.bandwidthDown,
-                up = config.bandwidthUp,
-            )
+        val bandwidth =
+            if (config.bandwidthDown.isNullOrEmpty() || config.bandwidthUp.isNullOrEmpty()) {
+                null
+            } else {
+                Hysteria2Bean.BandwidthBean(
+                    down = config.bandwidthDown,
+                    up = config.bandwidthUp,
+                )
+            }
 
         val server =
-            if (config.portHopping.isNullOrEmpty())
+            if (config.portHopping.isNullOrEmpty()) {
                 config.getServerAddressAndPort()
-            else
+            } else {
                 Utils.getIpv6Address(config.server) + ":" + config.portHopping
+            }
 
         val bean = Hysteria2Bean(
             server = server,
@@ -80,16 +96,16 @@ object Hysteria2Fmt : FmtBase() {
             transport = transport,
             bandwidth = bandwidth,
             socks5 = Hysteria2Bean.Socks5Bean(
-                listen = "$LOOPBACK:${socksPort}",
+                listen = "$LOOPBACK:$socksPort",
             ),
             http = Hysteria2Bean.Socks5Bean(
-                listen = "$LOOPBACK:${socksPort}",
+                listen = "$LOOPBACK:$socksPort",
             ),
             tls = Hysteria2Bean.TlsBean(
                 sni = config.sni ?: config.server,
                 insecure = config.insecure,
-                pinSHA256 = if (config.pinSHA256.isNullOrEmpty()) null else config.pinSHA256
-            )
+                pinSHA256 = if (config.pinSHA256.isNullOrEmpty()) null else config.pinSHA256,
+            ),
         )
         return bean
     }

@@ -5,7 +5,7 @@ import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 
 object JsonUtil {
-    private var gson = Gson()
+    private val gson = Gson()
 
     fun toJson(src: Any?): String = gson.toJson(src)
 

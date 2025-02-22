@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">AbuVPN</string>
-    <string name="app_widget_name">Abu Switch</string>
-    <string name="app_tile_name">Abu Switch</string>
-    <string name="app_tile_first_use">First use of this feature, please use the app to add server</string>
-    <string name="navigation_drawer_open">Open navigation drawer</string>
-    <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="migration_success">Data migration success!</string>
-    <string name="migration_fail">Data migration failed!</string>
-    <string name="pull_down_to_refresh">Please pull down to refresh!</string>
+    <string name="common_app_name" translatable="false">AbuVPN</string>
+    <string name="common_widget_title" translatable="false">Abu Widget</string>
+    <string name="common_quicktile_name" translatable="false">Abu Quick Tile</string>
+    <string name="common_shortcut_name" translatable="false">Abu Switch</string>
 
-    <!-- Notifications -->
+    <string name="home_settings">Settings</string>
+
+
+    <!-- Legacy -->
+    <string name="app_tile_first_use">Please use the app to add server</string>
     <string name="notification_action_stop_v2ray">Stop</string>
     <string name="toast_permission_denied">Unable to obtain the permission</string>
     <string name="toast_permission_denied_notification">Unable to obtain the notification permission</string>
@@ -20,7 +19,6 @@
     <string name="toast_services_success">Start Services Success</string>
     <string name="toast_services_failure">Start Services Failure</string>
 
-    <!--ServerActivity-->
     <string name="title_server">Configuration file</string>
     <string name="menu_item_add_config">Add config</string>
     <string name="menu_item_save_config">Save config</string>

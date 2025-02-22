@@ -3,17 +3,14 @@ package com.v2ray.ang.fmt
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.dto.NetworkType
 import com.v2ray.ang.dto.ProfileItem
-import com.v2ray.ang.extension.isNotNullEmpty
 import com.v2ray.ang.util.Utils
 import java.net.URI
 
 open class FmtBase {
-
-    fun getQueryParam(uri: URI): Map<String, String> {
-        return uri.rawQuery.split("&").associate {
+    fun getQueryParam(uri: URI): Map<String, String> =
+        uri.rawQuery.split("&").associate {
             it.split("=").let { (k, v) -> k to Utils.urlDecode(v) }
         }
-    }
 
     fun getItemFormQuery(
         config: ProfileItem,

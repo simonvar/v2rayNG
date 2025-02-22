@@ -1,6 +1,11 @@
 package com.v2ray.ang.dto
 
-enum class NetworkType(val type: String) {
+import kotlinx.serialization.Serializable
+
+@Serializable
+enum class NetworkType(
+    val type: String,
+) {
     TCP("tcp"),
     KCP("kcp"),
     WS("ws"),
@@ -8,7 +13,8 @@ enum class NetworkType(val type: String) {
     XHTTP("xhttp"),
     HTTP("http"),
     H2("h2"),
-    GRPC("grpc");
+    GRPC("grpc"),
+    ;
 
     companion object {
         fun fromString(type: String?) = entries.find { it.type == type } ?: TCP

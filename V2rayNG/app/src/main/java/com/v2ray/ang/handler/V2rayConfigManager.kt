@@ -233,7 +233,7 @@ object V2rayConfigManager {
                 return
             }
 
-            val rule = JsonUtil.fromJson(JsonUtil.toJson(item), RulesBean::class.java) ?: return
+            val rule = JsonUtil.fromJson(JsonUtil.toJson(item), RulesBean::class.java)
 
             v2rayConfig.routing.rules.add(rule)
         } catch (e: Exception) {

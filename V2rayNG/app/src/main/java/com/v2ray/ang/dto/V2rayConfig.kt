@@ -8,8 +8,10 @@ import com.google.gson.JsonSerializer
 import com.google.gson.annotations.SerializedName
 import com.google.gson.reflect.TypeToken
 import com.v2ray.ang.AppConfig
-import com.v2ray.ang.dto.V2rayConfig.OutboundBean.OutSettingsBean.*
-import com.v2ray.ang.dto.V2rayConfig.OutboundBean.OutSettingsBean.VnextBean.*
+import com.v2ray.ang.dto.V2rayConfig.OutboundBean.OutSettingsBean.ServersBean
+import com.v2ray.ang.dto.V2rayConfig.OutboundBean.OutSettingsBean.VnextBean
+import com.v2ray.ang.dto.V2rayConfig.OutboundBean.OutSettingsBean.VnextBean.UsersBean
+import com.v2ray.ang.dto.V2rayConfig.OutboundBean.OutSettingsBean.WireGuardBean
 import com.v2ray.ang.util.Utils
 import java.lang.reflect.Type
 
@@ -30,7 +32,6 @@ data class V2rayConfig(
     var observatory: Any? = null,
     var burstObservatory: Any? = null,
 ) {
-
     data class LogBean(
         val access: String,
         val error: String,
@@ -48,7 +49,6 @@ data class V2rayConfig(
         val streamSettings: Any? = null,
         val allocate: Any? = null,
     ) {
-
         data class InSettingsBean(
             val auth: String? = null,
             val udp: Boolean? = null,
@@ -79,12 +79,13 @@ data class V2rayConfig(
             fun create(configType: EConfigType): OutboundBean? {
                 return when (configType) {
                     EConfigType.VMESS,
-                    EConfigType.VLESS ->
+                    EConfigType.VLESS,
+                    ->
                         return OutboundBean(
                             protocol = configType.name.lowercase(),
                             settings =
                                 OutSettingsBean(
-                                    vnext = listOf(VnextBean(users = listOf(UsersBean())))
+                                    vnext = listOf(VnextBean(users = listOf(UsersBean()))),
                                 ),
                             streamSettings = StreamSettingsBean(),
                         )
@@ -92,7 +93,8 @@ data class V2rayConfig(
                     EConfigType.SHADOWSOCKS,
                     EConfigType.SOCKS,
                     EConfigType.TROJAN,
-                    EConfigType.HYSTERIA2 ->
+                    EConfigType.HYSTERIA2,
+                    ->
                         return OutboundBean(
                             protocol = configType.name.lowercase(),
                             settings = OutSettingsBean(servers = listOf(ServersBean())),
@@ -102,8 +104,10 @@ data class V2rayConfig(
                     EConfigType.WIREGUARD ->
                         return OutboundBean(
                             protocol = configType.name.lowercase(),
-                            settings =
-                                OutSettingsBean(secretKey = "", peers = listOf(WireGuardBean())),
+                            settings = OutSettingsBean(
+                                secretKey = "",
+                                peers = listOf(WireGuardBean()),
+                            ),
                         )
                 }
             }
@@ -114,32 +118,30 @@ data class V2rayConfig(
             var fragment: FragmentBean? = null,
             var noises: List<NoiseBean>? = null,
             var servers: List<ServersBean>? = null,
-            /*Blackhole*/
+            // Blackhole
             var response: Response? = null,
-            /*DNS*/
+            // DNS
             val network: String? = null,
             var address: Any? = null,
             val port: Int? = null,
-            /*Freedom*/
+            // Freedom
             var domainStrategy: String? = null,
             val redirect: String? = null,
             val userLevel: Int? = null,
-            /*Loopback*/
+            // Loopback
             val inboundTag: String? = null,
-            /*Wireguard*/
+            // Wireguard
             var secretKey: String? = null,
             val peers: List<WireGuardBean>? = null,
             var reserved: List<Int>? = null,
             var mtu: Int? = null,
             var obfsPassword: String? = null,
         ) {
-
             data class VnextBean(
                 var address: String = "",
                 var port: Int = AppConfig.DEFAULT_PORT,
                 var users: List<UsersBean>,
             ) {
-
                 data class UsersBean(
                     var id: String = "",
                     var alterId: Int? = null,
@@ -181,7 +183,9 @@ data class V2rayConfig(
                 )
             }
 
-            data class Response(var type: String)
+            data class Response(
+                var type: String,
+            )
 
             data class WireGuardBean(
                 var publicKey: String = "",
@@ -207,7 +211,6 @@ data class V2rayConfig(
             val dsSettings: Any? = null,
             var sockopt: SockoptBean? = null,
         ) {
-
             data class TcpSettingsBean(
                 var header: HeaderBean = HeaderBean(),
                 val acceptProxyProtocol: Boolean? = null,
@@ -246,7 +249,9 @@ data class V2rayConfig(
                 var header: HeaderBean = HeaderBean(),
                 var seed: String? = null,
             ) {
-                data class HeaderBean(var type: String = "none")
+                data class HeaderBean(
+                    var type: String = "none",
+                )
             }
 
             data class WsSettingsBean(
@@ -256,7 +261,9 @@ data class V2rayConfig(
                 val useBrowserForwarding: Boolean? = null,
                 val acceptProxyProtocol: Boolean? = null,
             ) {
-                data class HeadersBean(var Host: String = "")
+                data class HeadersBean(
+                    var Host: String = "",
+                )
             }
 
             data class HttpupgradeSettingsBean(
@@ -310,7 +317,9 @@ data class V2rayConfig(
                 var key: String = "",
                 var header: HeaderBean = HeaderBean(),
             ) {
-                data class HeaderBean(var type: String = "none")
+                data class HeaderBean(
+                    var type: String = "none",
+                )
             }
 
             data class GrpcSettingsBean(
@@ -410,11 +419,16 @@ data class V2rayConfig(
                     }
 
                     NetworkType.H2.type,
-                    NetworkType.HTTP.type -> {
+                    NetworkType.HTTP.type,
+                    -> {
                         network = NetworkType.H2.type
                         val h2Setting = HttpSettingsBean()
                         h2Setting.host =
-                            host.orEmpty().split(",").map { it.trim() }.filter { it.isNotEmpty() }
+                            host
+                                .orEmpty()
+                                .split(",")
+                                .map { it.trim() }
+                                .filter { it.isNotEmpty() }
                         sni = h2Setting.host.getOrNull(0)
                         h2Setting.path = path ?: "/"
                         httpSettings = h2Setting
@@ -452,8 +466,11 @@ data class V2rayConfig(
                         serverName = if (sni.isNullOrEmpty()) null else sni,
                         fingerprint = if (fingerprint.isNullOrEmpty()) null else fingerprint,
                         alpn =
-                            if (alpns.isNullOrEmpty()) null
-                            else alpns.split(",").map { it.trim() }.filter { it.isNotEmpty() },
+                            if (alpns.isNullOrEmpty()) {
+                                null
+                            } else {
+                                alpns.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+                            },
                         publicKey = if (publicKey.isNullOrEmpty()) null else publicKey,
                         shortId = if (shortId.isNullOrEmpty()) null else shortId,
                         spiderX = if (spiderX.isNullOrEmpty()) null else spiderX,
@@ -478,18 +495,22 @@ data class V2rayConfig(
         fun getServerAddress(): String? {
             if (
                 protocol.equals(EConfigType.VMESS.name, true) ||
-                    protocol.equals(EConfigType.VLESS.name, true)
+                protocol.equals(EConfigType.VLESS.name, true)
             ) {
                 return settings?.vnext?.first()?.address
             } else if (
                 protocol.equals(EConfigType.SHADOWSOCKS.name, true) ||
-                    protocol.equals(EConfigType.SOCKS.name, true) ||
-                    protocol.equals(EConfigType.TROJAN.name, true) ||
-                    protocol.equals(EConfigType.HYSTERIA2.name, true)
+                protocol.equals(EConfigType.SOCKS.name, true) ||
+                protocol.equals(EConfigType.TROJAN.name, true) ||
+                protocol.equals(EConfigType.HYSTERIA2.name, true)
             ) {
                 return settings?.servers?.first()?.address
             } else if (protocol.equals(EConfigType.WIREGUARD.name, true)) {
-                return settings?.peers?.first()?.endpoint?.substringBeforeLast(":")
+                return settings
+                    ?.peers
+                    ?.first()
+                    ?.endpoint
+                    ?.substringBeforeLast(":")
             }
             return null
         }
@@ -497,18 +518,23 @@ data class V2rayConfig(
         fun getServerPort(): Int? {
             if (
                 protocol.equals(EConfigType.VMESS.name, true) ||
-                    protocol.equals(EConfigType.VLESS.name, true)
+                protocol.equals(EConfigType.VLESS.name, true)
             ) {
                 return settings?.vnext?.first()?.port
             } else if (
                 protocol.equals(EConfigType.SHADOWSOCKS.name, true) ||
-                    protocol.equals(EConfigType.SOCKS.name, true) ||
-                    protocol.equals(EConfigType.TROJAN.name, true) ||
-                    protocol.equals(EConfigType.HYSTERIA2.name, true)
+                protocol.equals(EConfigType.SOCKS.name, true) ||
+                protocol.equals(EConfigType.TROJAN.name, true) ||
+                protocol.equals(EConfigType.HYSTERIA2.name, true)
             ) {
                 return settings?.servers?.first()?.port
             } else if (protocol.equals(EConfigType.WIREGUARD.name, true)) {
-                return settings?.peers?.first()?.endpoint?.substringAfterLast(":")?.toInt()
+                return settings
+                    ?.peers
+                    ?.first()
+                    ?.endpoint
+                    ?.substringAfterLast(":")
+                    ?.toInt()
             }
             return null
         }
@@ -544,7 +570,6 @@ data class V2rayConfig(
         var rules: ArrayList<RulesBean>,
         val balancers: List<Any>? = null,
     ) {
-
         data class RulesBean(
             var type: String = "field",
             var ip: ArrayList<String>? = null,
@@ -563,7 +588,10 @@ data class V2rayConfig(
         )
     }
 
-    data class PolicyBean(var levels: Map<String, LevelBean>, var system: Any? = null) {
+    data class PolicyBean(
+        var levels: Map<String, LevelBean>,
+        var system: Any? = null,
+    ) {
         data class LevelBean(
             var handshake: Int? = null,
             var connIdle: Int? = null,
@@ -591,18 +619,17 @@ data class V2rayConfig(
         return null
     }
 
-    fun toPrettyPrinting(): String {
-        return GsonBuilder()
+    fun toPrettyPrinting(): String =
+        GsonBuilder()
             .setPrettyPrinting()
             .disableHtmlEscaping()
-            .registerTypeAdapter( // custom serialiser is needed here since JSON by default parse
+            .registerTypeAdapter(
+                // custom serialiser is needed here since JSON by default parse
                 // number as Double, core will fail to start
                 object : TypeToken<Double>() {}.type,
                 JsonSerializer { src: Double?, _: Type?, _: JsonSerializationContext? ->
                     JsonPrimitive(src?.toInt())
                 },
-            )
-            .create()
+            ).create()
             .toJson(this)
-    }
 }

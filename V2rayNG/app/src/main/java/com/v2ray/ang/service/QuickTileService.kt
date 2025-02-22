@@ -21,7 +21,7 @@ class QuickTileService : TileService() {
     fun setState(state: Int) {
         if (state == Tile.STATE_INACTIVE) {
             qsTile?.state = Tile.STATE_INACTIVE
-            qsTile?.label = getString(R.string.app_name)
+            qsTile?.label = getString(R.string.common_app_name)
             qsTile?.icon = Icon.createWithResource(applicationContext, R.drawable.ic_stat_name)
         } else if (state == Tile.STATE_ACTIVE) {
             qsTile?.state = Tile.STATE_ACTIVE

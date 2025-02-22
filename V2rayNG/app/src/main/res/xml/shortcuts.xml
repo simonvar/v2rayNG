@@ -3,10 +3,10 @@
     <shortcut
         android:enabled="true"
         android:icon="@drawable/ic_qu_switch_24dp"
-        android:shortcutDisabledMessage="@string/app_widget_name"
+        android:shortcutDisabledMessage="@string/common_shortcut_name"
         android:shortcutId="shortcuts_switch"
-        android:shortcutLongLabel="@string/app_widget_name"
-        android:shortcutShortLabel="@string/app_widget_name">
+        android:shortcutLongLabel="@string/common_shortcut_name"
+        android:shortcutShortLabel="@string/common_shortcut_name">
 
         <intent
             android:action="android.intent.action.VIEW"
