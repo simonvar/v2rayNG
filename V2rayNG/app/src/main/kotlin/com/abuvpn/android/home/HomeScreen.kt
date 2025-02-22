@@ -15,23 +15,34 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.abuvpn.android.Destination
 
 internal fun NavGraphBuilder.home() {
     composable<Destination.Home> { entry ->
-        HomeScreen(modifier = Modifier.fillMaxSize())
+        val vm: HomeViewModel = viewModel<HomeViewModelImpl>()
+        val state by vm.state.collectAsStateWithLifecycle()
+        HomeScreen(
+            state = state,
+            modifier = Modifier.fillMaxSize(),
+        )
     }
 }
 
 @Composable
-private fun HomeScreen(modifier: Modifier = Modifier) {
+private fun HomeScreen(
+    state: HomeViewModel.State,
+    modifier: Modifier = Modifier,
+) {
     Scaffold(
         modifier = modifier,
         topBar = {
