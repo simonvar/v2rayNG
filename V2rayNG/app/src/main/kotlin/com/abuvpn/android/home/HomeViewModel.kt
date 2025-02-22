@@ -2,7 +2,13 @@ package com.abuvpn.android.home
 
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.CreationExtras
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import com.abuvpn.android.AbuActivity
 import com.v2ray.ang.handler.ConfigManager
 import com.v2ray.ang.handler.MmkvManager
 import kotlinx.coroutines.Dispatchers
@@ -61,4 +67,15 @@ internal class HomeViewModelImpl :
                 it.copy(isConfigured = MmkvManager.getSelectServer() != null)
             }
         }
+
+    companion object {
+        internal val ACTIVITY_KEY = object : CreationExtras.Key<AbuActivity> {}
+        val Factory: ViewModelProvider.Factory = viewModelFactory {
+            initializer {
+                val savedStateHandle = createSavedStateHandle()
+                val activity = (this[ACTIVITY_KEY] as AbuActivity)
+                HomeViewModelImpl()
+            }
+        }
+    }
 }
