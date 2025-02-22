@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_tile_first_use">Используйте приложение, чтобы добавить сервер</string>
-    <string name="home_settings">Настройки</string>
 
+    <!-- Home -->
+    <string name="home_settings">Настройки</string>
+    <string name="home_input_button" translatable="false">Настроить VPN</string>
 
     <!-- Legacy -->
     <string name="notification_action_stop_v2ray">Остановить</string>

@@ -12,3 +12,5 @@ internal val Pink40 = Color(0xFF7D5260)
 
 internal val Jacarta = Color(0xFF332B5C)
 internal val ChineseBlack = Color(0xFF120E23)
+
+internal val Green = Color(0xFF24BB4C)

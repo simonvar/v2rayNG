@@ -3,7 +3,7 @@ package com.v2ray.ang.handler
 import android.text.TextUtils
 import com.v2ray.ang.AppConfig.HY2
 import com.v2ray.ang.R
-import com.v2ray.ang.dto.*
+import com.v2ray.ang.dto.EConfigType
 import com.v2ray.ang.fmt.Hysteria2Fmt
 import com.v2ray.ang.fmt.ShadowsocksFmt
 import com.v2ray.ang.fmt.SocksFmt
@@ -13,8 +13,7 @@ import com.v2ray.ang.fmt.VmessFmt
 import com.v2ray.ang.fmt.WireguardFmt
 import com.v2ray.ang.util.Utils
 
-object AngConfigManager {
-
+object ConfigManager {
     fun importBatchConfig(server: String?): Int {
         var count = parseBatchConfig(Utils.decode(server))
         if (count <= 0) {

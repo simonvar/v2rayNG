@@ -18,7 +18,7 @@ import com.v2ray.ang.AppConfig.VPN
 import com.v2ray.ang.R
 import com.v2ray.ang.databinding.ActivityMainBinding
 import com.v2ray.ang.extension.toast
-import com.v2ray.ang.handler.AngConfigManager
+import com.v2ray.ang.handler.ConfigManager
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.service.V2RayServiceManager
 import com.v2ray.ang.util.Utils
@@ -156,7 +156,7 @@ class MainActivity : BaseActivity() {
 
         lifecycleScope.launch(Dispatchers.IO) {
             try {
-                val count = AngConfigManager.importBatchConfig(server)
+                val count = ConfigManager.importBatchConfig(server)
                 delay(500L)
                 withContext(Dispatchers.Main) {
                     when {

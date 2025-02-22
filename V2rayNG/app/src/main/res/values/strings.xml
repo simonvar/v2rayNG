@@ -5,8 +5,10 @@
     <string name="common_quicktile_name" translatable="false">Abu Quick Tile</string>
     <string name="common_shortcut_name" translatable="false">Abu Switch</string>
 
+    <!-- Home -->
     <string name="home_settings">Settings</string>
-
+    <string name="home_input_placeholder" translatable="false">https://abuvpn.com/xxxx</string>
+    <string name="home_input_button" translatable="false">Configure VPN</string>
 
     <!-- Legacy -->
     <string name="app_tile_first_use">Please use the app to add server</string>
