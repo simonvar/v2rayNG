@@ -10,9 +10,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Color
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.v2ray.ang.AppConfig
@@ -81,17 +79,15 @@ object V2RayServiceManager {
         } else {
             context.toast(R.string.toast_services_start)
         }
-        val intent =
-            if ((MmkvManager.decodeSettingsString(AppConfig.PREF_MODE) ?: VPN) == VPN) {
-                Intent(context.applicationContext, V2RayVpnService::class.java)
-            } else {
-                Intent(context.applicationContext, V2RayProxyOnlyService::class.java)
-            }
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N_MR1) {
-            context.startForegroundService(intent)
+
+        val isVpnMode = (MmkvManager.decodeSettingsString(AppConfig.PREF_MODE) ?: VPN) == VPN
+        val intent = if (isVpnMode) {
+            Intent(context.applicationContext, V2RayVpnService::class.java)
         } else {
-            context.startService(intent)
+            Intent(context.applicationContext, V2RayProxyOnlyService::class.java)
         }
+
+        context.startForegroundService(intent)
     }
 
     private class V2RayCallback : V2RayVPNServiceSupportsSet {
@@ -280,12 +276,11 @@ object V2RayServiceManager {
                     }
                 }
             }
-            val result =
-                if (time == -1L) {
-                    service.getString(R.string.connection_test_error, errstr)
-                } else {
-                    service.getString(R.string.connection_test_available, time)
-                }
+            val result = if (time == -1L) {
+                service.getString(R.string.connection_test_error, errstr)
+            } else {
+                service.getString(R.string.connection_test_available, time)
+            }
 
             MessageUtil.sendMsg2UI(service, AppConfig.MSG_MEASURE_DELAY_SUCCESS, result)
         }
@@ -293,12 +288,7 @@ object V2RayServiceManager {
 
     private fun showNotification() {
         val service = serviceControl?.get()?.getService() ?: return
-        val flags =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-            } else {
-                PendingIntent.FLAG_UPDATE_CURRENT
-            }
+        val flags = PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
 
         val startMainIntent = Intent(service, MainActivity::class.java)
         val contentPendingIntent =
@@ -312,58 +302,46 @@ object V2RayServiceManager {
         val stopV2RayIntent = Intent(AppConfig.BROADCAST_ACTION_SERVICE)
         stopV2RayIntent.`package` = ANG_PACKAGE
         stopV2RayIntent.putExtra("key", AppConfig.MSG_STATE_STOP)
-        val stopV2RayPendingIntent =
-            PendingIntent.getBroadcast(
-                service,
-                NOTIFICATION_PENDING_INTENT_STOP_V2RAY,
-                stopV2RayIntent,
-                flags,
-            )
+        val stopV2RayPendingIntent = PendingIntent.getBroadcast(
+            service,
+            NOTIFICATION_PENDING_INTENT_STOP_V2RAY,
+            stopV2RayIntent,
+            flags,
+        )
 
         val restartV2RayIntent = Intent(AppConfig.BROADCAST_ACTION_SERVICE)
         restartV2RayIntent.`package` = ANG_PACKAGE
         restartV2RayIntent.putExtra("key", AppConfig.MSG_STATE_RESTART)
-        val restartV2RayPendingIntent =
-            PendingIntent.getBroadcast(
-                service,
-                NOTIFICATION_PENDING_INTENT_RESTART_V2RAY,
-                restartV2RayIntent,
-                flags,
+        val restartV2RayPendingIntent = PendingIntent.getBroadcast(
+            service,
+            NOTIFICATION_PENDING_INTENT_RESTART_V2RAY,
+            restartV2RayIntent,
+            flags,
+        )
+
+        val channelId = createNotificationChannel()
+
+        mBuilder = NotificationCompat
+            .Builder(service, channelId)
+            .setSmallIcon(R.drawable.ic_stat_name)
+            .setPriority(NotificationCompat.PRIORITY_MIN)
+            .setOngoing(true)
+            .setShowWhen(false)
+            .setOnlyAlertOnce(true)
+            .setContentIntent(contentPendingIntent)
+            .addAction(
+                R.drawable.ic_delete_24dp,
+                service.getString(R.string.notification_action_stop_v2ray),
+                stopV2RayPendingIntent,
+            ).addAction(
+                R.drawable.ic_delete_24dp,
+                service.getString(R.string.title_service_restart),
+                restartV2RayPendingIntent,
             )
-
-        val channelId =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                createNotificationChannel()
-            } else {
-                // If earlier version channel ID is not used
-                // https://developer.android.com/reference/android/support/v4/app/NotificationCompat.Builder.html#NotificationCompat.Builder(android.content.Context)
-                ""
-            }
-
-        mBuilder =
-            NotificationCompat
-                .Builder(service, channelId)
-                .setSmallIcon(R.drawable.ic_stat_name)
-                .setContentTitle(currentConfig?.remarks)
-                .setPriority(NotificationCompat.PRIORITY_MIN)
-                .setOngoing(true)
-                .setShowWhen(false)
-                .setOnlyAlertOnce(true)
-                .setContentIntent(contentPendingIntent)
-                .addAction(
-                    R.drawable.ic_delete_24dp,
-                    service.getString(R.string.notification_action_stop_v2ray),
-                    stopV2RayPendingIntent,
-                ).addAction(
-                    R.drawable.ic_delete_24dp,
-                    service.getString(R.string.title_service_restart),
-                    restartV2RayPendingIntent,
-                )
 
         service.startForeground(NOTIFICATION_ID, mBuilder?.build())
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     private fun createNotificationChannel(): String {
         val channelId = AppConfig.RAY_NG_CHANNEL_ID
         val channelName = AppConfig.RAY_NG_CHANNEL_NAME
@@ -377,11 +355,7 @@ object V2RayServiceManager {
 
     fun cancelNotification() {
         val service = serviceControl?.get()?.getService() ?: return
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            service.stopForeground(Service.STOP_FOREGROUND_REMOVE)
-        } else {
-            service.stopForeground(true)
-        }
+        service.stopForeground(Service.STOP_FOREGROUND_REMOVE)
 
         mBuilder = null
         mDisposable?.dispose()
@@ -405,9 +379,7 @@ object V2RayServiceManager {
                 mBuilder?.setSmallIcon(R.drawable.ic_stat_direct)
             }
             mBuilder?.setStyle(NotificationCompat.BigTextStyle().bigText(contentText))
-            mBuilder?.setContentText(
-                contentText,
-            ) // Emui4.1 need content text even if style is set as BigTextStyle
+            mBuilder?.setContentText(contentText)
             getNotificationManager()?.notify(NOTIFICATION_ID, mBuilder?.build())
         }
     }
@@ -492,7 +464,7 @@ object V2RayServiceManager {
 
     private fun stopSpeedNotification() {
         mDisposable?.let {
-            it.dispose() // stop queryStats
+            it.dispose()
             mDisposable = null
             updateNotification(currentConfig?.remarks, 0, 0)
         }

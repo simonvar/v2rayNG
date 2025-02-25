@@ -5,6 +5,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,7 +21,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.PowerSettingsNew
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -30,8 +32,10 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -49,12 +53,10 @@ import com.abuvpn.android.theme.Green
 internal fun NavGraphBuilder.home() {
     composable<Destination.Home> { entry ->
         val context = LocalContext.current
-        val vm: HomeViewModel = viewModel<HomeViewModelImpl>(
-            factory = HomeViewModelImpl.Factory,
-        )
+        val vm: HomeViewModel = viewModel<HomeViewModelImpl>()
         val requestVpnPermission = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.StartActivityForResult(),
-            onResult = { vm.onVpnLauncherResult(context, it) },
+            onResult = { vm.onVpnLauncherResult(it) },
         )
         val state by vm.state.collectAsStateWithLifecycle()
         HomeScreen(
@@ -71,7 +73,8 @@ internal fun NavGraphBuilder.home() {
             configured = {
                 HomeConfigured(
                     modifier = Modifier.fillMaxSize(),
-                    onConfigSwitch = { vm.onSwitchClick(context, requestVpnPermission) },
+                    isConnected = state.isConnected,
+                    onConfigSwitch = { vm.onSwitchClick(requestVpnPermission) },
                 )
             },
         )
@@ -138,18 +141,29 @@ private fun HomeTopBar(modifier: Modifier = Modifier) {
 @Composable
 private fun HomeConfigured(
     onConfigSwitch: () -> Unit,
+    isConnected: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        val bgColor = remember(isConnected) { if (isConnected) Green else Color.White }
+        val iconColor = remember(isConnected) { if (isConnected) Color.White else Color.Black }
         Box(
             modifier = Modifier
                 .size(160.dp)
-                .background(Color.White, shape = CircleShape),
+                .background(bgColor, shape = CircleShape)
+                .clip(CircleShape)
+                .clickable(onClick = onConfigSwitch),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
-                imageVector = Icons.Rounded.Add,
+                modifier = Modifier.size(42.dp),
+                imageVector = Icons.Rounded.PowerSettingsNew,
                 contentDescription = null,
+                tint = iconColor,
             )
         }
     }

@@ -86,35 +86,34 @@ class MainViewModel(
         }
     }
 
-    private val mMsgReceiver =
-        object : BroadcastReceiver() {
-            override fun onReceive(
-                ctx: Context?,
-                intent: Intent?,
-            ) {
-                when (intent?.getIntExtra("key", 0)) {
-                    AppConfig.MSG_STATE_RUNNING -> {
-                        isRunning.value = true
-                    }
+    private val mMsgReceiver = object : BroadcastReceiver() {
+        override fun onReceive(
+            context: Context,
+            intent: Intent,
+        ) {
+            when (intent.getIntExtra("key", 0)) {
+                AppConfig.MSG_STATE_RUNNING -> {
+                    isRunning.value = true
+                }
 
-                    AppConfig.MSG_STATE_NOT_RUNNING -> {
-                        isRunning.value = false
-                    }
+                AppConfig.MSG_STATE_NOT_RUNNING -> {
+                    isRunning.value = false
+                }
 
-                    AppConfig.MSG_STATE_START_SUCCESS -> {
-                        getApplication<AbuApplication>().toast(R.string.toast_services_success)
-                        isRunning.value = true
-                    }
+                AppConfig.MSG_STATE_START_SUCCESS -> {
+                    getApplication<AbuApplication>().toast(R.string.toast_services_success)
+                    isRunning.value = true
+                }
 
-                    AppConfig.MSG_STATE_START_FAILURE -> {
-                        getApplication<AbuApplication>().toast(R.string.toast_services_failure)
-                        isRunning.value = false
-                    }
+                AppConfig.MSG_STATE_START_FAILURE -> {
+                    getApplication<AbuApplication>().toast(R.string.toast_services_failure)
+                    isRunning.value = false
+                }
 
-                    AppConfig.MSG_STATE_STOP_SUCCESS -> {
-                        isRunning.value = false
-                    }
+                AppConfig.MSG_STATE_STOP_SUCCESS -> {
+                    isRunning.value = false
                 }
             }
         }
+    }
 }
