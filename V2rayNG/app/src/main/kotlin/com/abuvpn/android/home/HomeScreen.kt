@@ -1,6 +1,5 @@
 package com.abuvpn.android.home
 
-import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.Crossfade
@@ -34,15 +33,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.MutableCreationExtras
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-import com.abuvpn.android.AbuActivity
 import com.abuvpn.android.AbuDrawable
 import com.abuvpn.android.AbuString
 import com.abuvpn.android.Destination
@@ -50,18 +48,13 @@ import com.abuvpn.android.theme.Green
 
 internal fun NavGraphBuilder.home() {
     composable<Destination.Home> { entry ->
-
-        val requestVpnPermission = rememberLauncherForActivityResult(
-            ActivityResultContracts.StartActivityForResult(),
-        ) {
-        }
-
-        val activity = LocalActivity.current as AbuActivity
+        val context = LocalContext.current
         val vm: HomeViewModel = viewModel<HomeViewModelImpl>(
             factory = HomeViewModelImpl.Factory,
-            extras = MutableCreationExtras().apply {
-                set(HomeViewModelImpl.ACTIVITY_KEY, activity)
-            },
+        )
+        val requestVpnPermission = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.StartActivityForResult(),
+            onResult = { vm.onVpnLauncherResult(context, it) },
         )
         val state by vm.state.collectAsStateWithLifecycle()
         HomeScreen(
@@ -78,7 +71,7 @@ internal fun NavGraphBuilder.home() {
             configured = {
                 HomeConfigured(
                     modifier = Modifier.fillMaxSize(),
-                    onConfigSwitch = {},
+                    onConfigSwitch = { vm.onSwitchClick(context, requestVpnPermission) },
                 )
             },
         )

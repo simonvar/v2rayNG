@@ -1,16 +1,22 @@
 package com.abuvpn.android.home
 
+import android.app.Activity
+import android.content.Context
+import android.content.Intent
+import android.net.VpnService
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.abuvpn.android.AbuActivity
+import com.v2ray.ang.R
+import com.v2ray.ang.extension.toast
 import com.v2ray.ang.handler.ConfigManager
 import com.v2ray.ang.handler.MmkvManager
+import com.v2ray.ang.service.V2RayServiceManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,6 +26,16 @@ import kotlinx.coroutines.launch
 
 internal interface HomeViewModel {
     val state: StateFlow<State>
+
+    fun onSwitchClick(
+        context: Context,
+        launcher: ActivityResultLauncher<Intent>,
+    )
+
+    fun onVpnLauncherResult(
+        context: Context,
+        result: ActivityResult,
+    )
 
     fun onConfigCreate()
 
@@ -43,6 +59,27 @@ internal class HomeViewModelImpl :
         initConfig()
     }
 
+    override fun onSwitchClick(
+        context: Context,
+        launcher: ActivityResultLauncher<Intent>,
+    ) {
+        val intent = VpnService.prepare(context)
+        if (intent == null) {
+            startV2Ray(context)
+        } else {
+            launcher.launch(intent)
+        }
+    }
+
+    override fun onVpnLauncherResult(
+        context: Context,
+        result: ActivityResult,
+    ) {
+        if (result.resultCode == Activity.RESULT_OK) {
+            startV2Ray(context)
+        }
+    }
+
     override fun onConfigCreate() {
         val config = _state.value.configInput
         if (config.isNotBlank()) {
@@ -61,6 +98,14 @@ internal class HomeViewModelImpl :
         }
     }
 
+    private fun startV2Ray(context: Context) {
+        if (MmkvManager.getSelectServer().isNullOrEmpty()) {
+            context.toast(R.string.title_file_chooser)
+            return
+        }
+        V2RayServiceManager.startV2Ray(context)
+    }
+
     private fun initConfig() =
         viewModelScope.launch(Dispatchers.IO) {
             _state.update {
@@ -69,11 +114,8 @@ internal class HomeViewModelImpl :
         }
 
     companion object {
-        internal val ACTIVITY_KEY = object : CreationExtras.Key<AbuActivity> {}
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
-                val savedStateHandle = createSavedStateHandle()
-                val activity = (this[ACTIVITY_KEY] as AbuActivity)
                 HomeViewModelImpl()
             }
         }
